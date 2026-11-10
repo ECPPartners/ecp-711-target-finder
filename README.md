@@ -14,3 +14,4 @@ Run order (pilot counties), from a work dir with `dl/` and `out/`:
 9. `08_source_workbook.py out "<xlsx>"` then `09_format_xlsx.py "<xlsx>"`
 
 Python deps: geopandas pyogrio pyarrow remotezip requests openpyxl
+10. `11_candidates_score.py out "<source.xlsx>" "<result.xlsx>"` — candidates, scoring, tiers, backtest. Override weights with env SCORE_OPTS='{"weights":{...},"mf_weight":0.5}'
