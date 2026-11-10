@@ -37,7 +37,7 @@ def main(out, xlsx):
     yb = pd.to_numeric(se['parcel_year_built (inferred store age)'], errors='coerce').fillna(pd.to_numeric(se.tracker_year_built, errors='coerce'))
     se['vintage (inferred)'] = np.where(yb >= 2018, 'New build (2018+)', np.where(yb.notna(), 'Legacy (pre-2018)', 'Unknown'))
     se['format'] = np.where(se.has_fuel == 'Y', 'Fuel', 'Non-fuel')
-    net = se[['brand', 'store_ref', 'address', 'city', 'zip', 'county', 're_manager', 'format', 'diesel', 'vintage (inferred)',
+    net = se[['brand', 'store_ref', 'in_7eleven_api', 'in_fdep', 'fdep_facility_id', 'address', 'city', 'zip', 'county', 're_manager', 'format', 'diesel', 'vintage (inferred)',
               'parcel_year_built (inferred store age)', 'parcel_id', 'parcel_use_code', 'tracker_tab', 'tracker_date',
               'tracker_year_built', 'tracker_acres', 'tracker_sf', 'tracker_match_method', 'lat', 'lon', 'source']]
 
@@ -45,7 +45,13 @@ def main(out, xlsx):
     st = gpd.read_file(os.path.join(out, 'stores_fl.geojson'))
     st = st.rename(columns={'NAME': 'county'})
     st = st[st.county.isin(PILOT)]
-    comp = st[st.category == 'Competitor'].copy()
+    fd = pd.read_csv(os.path.join(out, 'fdep_stations_fl.csv'))
+    fd = fd[fd.category == 'Competitor']
+    fdg = gpd.sjoin(gpd.GeoDataFrame(fd, geometry=gpd.points_from_xy(fd.lon, fd.lat), crs=4326), counties, how='inner', predicate='within')
+    fdg = fdg[fdg.county.isin(PILOT)]
+    comp = pd.DataFrame({'category': 'Competitor', 'brand': fdg.brand, 'name': fdg['name'], 'street': fdg.address, 'city': fdg.city,
+                         'zip': fdg.zip, 'county': fdg.county, 'lat': fdg.lat, 'lon': fdg.lon, 'source': fdg.source,
+                         'fuel_diesel': None, 'fuel_hgv': None})
     anc = st[st.category.isin(['Grocer', 'Anchor', 'National QSR/retail'])].copy()
     py = nearest_parcel_year(anc, com)
     anc['parcel_year_built (inferred)'] = py.yr.values
@@ -78,10 +84,10 @@ def main(out, xlsx):
 
     # 6. Sources & dates
     sources = pd.DataFrame([
-        ['7-Eleven / Speedway stores', '7-Eleven store API via AllThePlaces (seven_eleven_ca_us, speedway_us)', 'Run 2026-10-31', 'Hard data, but INCOMPLETE: missing many recent builds (see Data Gaps)'],
+        ['7-Eleven / Speedway stores', 'FDEP registered storage tanks (open retail stations named 7-Eleven/Speedway/Stripes) merged with 7-Eleven store API via AllThePlaces', 'FDEP pulled ' + TODAY + '; API run 2026-10-31', 'Hard data. FDEP covers fuel stores; non-fuel stores come from the API only. An OPEN FDEP record can include a store under construction.'],
         ['Fuel vs non-fuel', "7-Eleven's own store API (fuel record present)", 'Run 2026-10-31', 'Hard data'],
         ['Store vintage', 'Year built of nearest DOR commercial parcel (<=60 m), else tracker year built', 'DOR 2026 Final', 'INFERENCE'],
-        ['Competitors', 'AllThePlaces: Wawa, RaceTrac, Circle K, Sunoco, Murphy USA, Buc-ee\'s', 'Runs 2026-10-17 to 10-31', 'Hard data (coverage not verified)'],
+        ['Competitors', 'FDEP registered storage tanks: open retail stations, brand from facility name (Wawa, RaceTrac, Circle K, Sunoco, Murphy USA, Buc-ee\'s, Love\'s, Pilot, etc.)', 'Pulled ' + TODAY, 'Hard data; brand tag is a name match (stations renamed after a sale may be mis-tagged)'],
         ['Anchors & grocers', 'AllThePlaces: Publix, Aldi, Winn-Dixie, Walmart, Target, Costco, Sam\'s, Home Depot, Lowe\'s, Tractor Supply, McDonald\'s, etc.', 'Runs 2026-10-10 to 10-31', "Hard data; Walmart and Lowe's INCOMPLETE; Dollar General partial"],
         ['New grocery flag', 'Grocer on a parcel with year built 2023+', 'DOR 2026 Final', 'INFERENCE'],
         ['Traffic & trucks', 'FDOT AADT TDA layer (AADT, truck factor)', 'Count year 2025, pulled ' + TODAY, 'Hard data'],
@@ -91,16 +97,17 @@ def main(out, xlsx):
         ['RE manager territories', '7-Eleven FL-Southeast Development Team Map', 'Feb 2026', 'ECP data'],
     ], columns=['Dataset', 'Source', 'As of', 'Data class'])
     gaps = pd.DataFrame([
-        ['7-Eleven network incomplete', f"{int(net.tracker_tab.notna().sum())} of the tracker's Florida stores matched; many 2022-2025 builds (e.g., Fort Pierce, Vero Beach, Bradenton, Kissimmee, Palmetto) are missing from the 7-Eleven API data. The 2-mile filter cannot be trusted until fixed.",
-         'Allowlist ca.dep.state.fl.us (FDEP registered storage tanks: every fuel station incl. 7-Eleven, Speedway, Wawa, RaceTrac, with facility name and status) and/or 7-eleven.com; Luke spot-checks one county.'],
+        ['7-Eleven network (fixed Nov 10)', f"Now FDEP + 7-Eleven API. {int(net.tracker_tab.notna().sum())} of the pilot stores carry a tracker match; statewide 54 of 64 tracker rows match (the rest are duplicate listings or address-format mismatches: Apollo Beach, St. Augustine, CR-210 St. Johns, Homosassa, San Antonio, Homestead, Eustis, Winter Haven).",
+         'Luke spot-checks Hillsborough and Pasco; confirm the unmatched tracker sites.'],
         ['Walmart / Lowe\'s incomplete', 'AllThePlaces spiders returned partial data in all recent runs.', 'Retry each monthly refresh; Publix/Aldi/Target/Home Depot complete.'],
         ['County-road signals', 'FDOT signals layer appears to cover state roads only.', 'Mark unknown; Luke verifies on site.'],
+        ['7-eleven.com', 'Still blocked from scripts after allowlisting (may be bot-blocking or not yet applied).', 'Not needed now that FDEP works; recheck later.'],
     ], columns=['Gap', 'Detail', 'Fix'])
 
     with pd.ExcelWriter(xlsx, engine='openpyxl') as w:
         pd.DataFrame({'7-Eleven Source Data — ECP Partners — CONFIDENTIAL': [
             f'Pilot counties: {", ".join(PILOT)}', f'Built {TODAY}', 'Data class key: Hard data = from the source as published; ECP data = from ECP; INFERENCE = derived by Claude, verify before relying on it.',
-            'See Data Gaps before using the 7-Eleven Network tab for spacing decisions.']}).to_excel(w, 'Read Me', index=False)
+            'See Data Gaps for known limits.']}).to_excel(w, 'Read Me', index=False)
         net.to_excel(w, '7-Eleven Network', index=False)
         comp.to_excel(w, 'Competitors', index=False)
         anc.to_excel(w, 'Anchors & Grocers', index=False)

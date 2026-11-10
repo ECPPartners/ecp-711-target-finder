@@ -10,6 +10,7 @@ Run order (pilot counties), from a work dir with `dl/` and `out/`:
 5. `05_tracker_geocode.py <tracker.xlsx> out/tracker_fl.csv` — ECP sales tracker FL rows
 6. `06_parcels.py dl/dor dl/dor_x out/parcels <counties...>` — parcel points (res / vacant lots / commercial)
 7. `07_network.py dl/atp out` — 7-Eleven network + tracker match
-8. `08_source_workbook.py out "<xlsx>"` then `09_format_xlsx.py "<xlsx>"`
+8. `10_fdep_stations.py out` — FDEP open retail fuel stations (run before 07)
+9. `08_source_workbook.py out "<xlsx>"` then `09_format_xlsx.py "<xlsx>"`
 
 Python deps: geopandas pyogrio pyarrow remotezip requests openpyxl

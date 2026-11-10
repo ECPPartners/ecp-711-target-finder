@@ -38,6 +38,27 @@ def main(atp, out):
                          zip=p.get('addr:postcode'), lat=lat, lon=lon, has_fuel='Y' if p.get('amenity') == 'fuel' else 'N',
                          diesel=p.get('fuel:diesel'), source='Speedway store API via AllThePlaces (speedway_us, run 2026-10-31)'))
     df = pd.DataFrame(rows)
+    df['in_7eleven_api'] = 'Y'
+    # Merge FDEP registered fuel stations (far more complete for fuel stores). Match on store number, else <= 150 m.
+    fd = pd.read_csv(os.path.join(out, 'fdep_stations_fl.csv'), dtype={'store_no': str})
+    fd = fd[fd.category == '7-Eleven family'].copy()
+    api = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.lon, df.lat), crs=4326).to_crs(3086)
+    fdg = gpd.GeoDataFrame(fd, geometry=gpd.points_from_xy(fd.lon, fd.lat), crs=4326).to_crs(3086)
+    df['fdep_facility_id'] = None
+    used = set()
+    refs = dict(zip(df.store_ref.astype(str), df.index))
+    for i, r in fdg.iterrows():
+        j = refs.get(str(r.store_no)) if pd.notna(r.store_no) else None
+        if j is None:
+            d = api.distance(r.geometry)
+            if len(d) and d.min() <= 150: j = d.idxmin()
+        if j is not None and j not in used:
+            df.loc[j, 'fdep_facility_id'] = r.fdep_facility_id; used.add(j)
+        else:
+            df.loc[len(df)] = dict(store_ref=r.store_no if pd.notna(r.store_no) else f'FDEP{r.fdep_facility_id}', brand=r.brand,
+                                   address=r.address, city=r.city, zip=r.zip, lat=r.lat, lon=r.lon, has_fuel='Y', diesel=None,
+                                   source=r.source, in_7eleven_api='N', fdep_facility_id=r.fdep_facility_id)
+    df['in_fdep'] = np.where(df.fdep_facility_id.notna(), 'Y', 'N')
     g = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.lon, df.lat), crs=4326)
     counties = gpd.read_file(os.path.join(out, 'fl_counties.geojson'))[['NAME', 'geometry']].rename(columns={'NAME': 'county'})
     g = gpd.sjoin(g, counties, how='left', predicate='within').drop(columns='index_right')
@@ -67,6 +88,7 @@ def main(atp, out):
             g.loc[idx, ['tracker_tab', 'tracker_date', 'tracker_year_built', 'tracker_acres', 'tracker_sf', 'tracker_match_method']] = \
                 [t.tracker_tab, str(t.date)[:10], t.year_built, t.acres, t.building_sf, method]
     g.drop(columns='geometry').to_csv(os.path.join(out, 'seven_eleven_fl.csv'), index=False)
+    print('in API only', ((g.in_7eleven_api == 'Y') & (g.in_fdep == 'N')).sum(), '| FDEP only', (g.in_7eleven_api == 'N').sum(), '| both', ((g.in_7eleven_api == 'Y') & (g.in_fdep == 'Y')).sum())
     print('stores', len(g), '| fuel', (g.has_fuel == 'Y').sum(), '| non-fuel', (g.has_fuel == 'N').sum())
     print('tracker rows', len(tr), '| matched to a store', g.tracker_tab.notna().sum())
     print(g.groupby('county').size().sort_values(ascending=False).head(15).to_string())
