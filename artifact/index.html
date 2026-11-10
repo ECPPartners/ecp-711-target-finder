@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7-Eleven Target Area Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brandline">
+    <div>
+      <div class="eyebrow">ECP Partners · Confidential</div>
+      <h1>7-Eleven Target Area Finder</h1>
+    </div>
+    <div class="meta" id="metaLine">Loading data…</div>
+  </div>
+  <nav class="tabs" aria-label="Views">
+    <a href="#map" data-view="map">Map</a>
+    <a href="#list" data-view="list">Ranked list</a>
+    <a href="#packs" data-view="packs">Manager packs</a>
+    <a href="#log" data-view="log">Submittal log</a>
+    <a href="#methods" data-view="methods">Data &amp; methods</a>
+  </nav>
+</header>
+
+<section class="filters" aria-label="Filters">
+  <label>RE manager
+    <select id="fManager"><option value="">All</option><option>Bauer</option><option>Golden</option><option>Antonacci</option></select></label>
+  <label>County <select id="fCounty"><option value="">All</option></select></label>
+  <label>Tier <select id="fTier"><option value="">All</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></label>
+  <label>Market <select id="fMarket"><option value="">All</option><option value="Proven">Proven</option><option value="White">White space</option></select></label>
+  <label class="chk"><input type="checkbox" id="fTop"> Top 50 only</label>
+  <label class="grow">Search <input type="search" id="fSearch" placeholder="Road or city name"></label>
+  <span class="count" id="fCount"></span>
+</section>
+
+<main>
+  <section class="view" id="view-map">
+    <div class="maplayout">
+      <aside class="side">
+        <div class="layers" id="layerToggles" aria-label="Map layers"></div>
+        <div class="legend" id="legend"></div>
+        <div class="ask" id="askBox" hidden>
+          <label for="askInput" class="label">Ask Claude about these candidates</label>
+          <div class="askrow"><input id="askInput" type="text" placeholder="e.g. White-space corners in Pasco with 3,000+ new homes"><button id="askBtn" class="btn">Ask</button></div>
+          <div class="askout" id="askOut"></div>
+        </div>
+        <ol class="clist" id="clist"></ol>
+      </aside>
+      <div class="mapwrap">
+        <div id="map" role="application" aria-label="Map of candidate intersections"></div>
+        <div class="detail" id="detail" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="view-list" hidden>
+    <div class="viewhead">
+      <div><h2>Ranked candidates</h2><p class="muted">Intersections that pass the 2-mile rule, scored with the approved weights. Click a row to open it on the map.</p></div>
+      <button class="btn" id="exportList">Download Excel</button>
+    </div>
+    <div class="tablewrap"><table class="grid" id="rankTable"></table></div>
+  </section>
+
+  <section class="view" id="view-packs" hidden>
+    <div class="viewhead">
+      <div><h2>Manager packs</h2><p class="muted">Target areas to bring to each 7-Eleven RE manager. Defaults to the top Tier A corners in their territory; pin your own from any candidate's detail panel.</p></div>
+    </div>
+    <div id="packs"></div>
+  </section>
+
+  <section class="view" id="view-log" hidden>
+    <div class="viewhead">
+      <div><h2>Submittal log</h2><p class="muted">Every site sent to 7-Eleven and what they said. Passes matter as much as wins: the quarterly recalibration reads this log.</p></div>
+      <div class="btnrow"><button class="btn" id="newSub">Log a submittal</button><button class="btn ghost" id="exportLog">Download Excel</button></div>
+    </div>
+    <div class="note" id="logNote"></div>
+    <form class="subform" id="subForm" hidden></form>
+    <div class="tablewrap"><table class="grid" id="logTable"></table></div>
+  </section>
+
+  <section class="view" id="view-methods" hidden>
+    <div class="methods" id="methods"></div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
