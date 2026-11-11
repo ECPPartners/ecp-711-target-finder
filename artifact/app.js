@@ -21,7 +21,7 @@ const gmaps = c => `https://www.google.com/maps/search/?api=1&query=${c.lat},${c
 const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, m => m.toUpperCase()).replace(/\b(Sr|Us|Cr|Ne|Nw|Se|Sw|Fl)\b/g, m => m.toUpperCase()).replace(/\bSt\b(?= [A-Z])/g, 'St');
 
 const S = {
-  data: null, filtered: [], sel: null, sort: { key: 'rank', dir: 1 },
+  data: null, filtered: [], sel: null, sort: { key: 'pos', dir: 1 },
   reviews: {}, packs: {}, subs: [], db: null, user: null, sample: null, downloads: null, canWrite: null, names: {},
 };
 
@@ -42,15 +42,17 @@ async function loadData() {
 
 /* ---------- filters ---------- */
 function readFilters() {
-  return { m: $('#fManager').value, c: $('#fCounty').value, t: $('#fTier').value, k: $('#fMarket').value, top: $('#fTop').checked, q: $('#fSearch').value.trim().toLowerCase() };
+  return { m: $('#fManager').value, c: $('#fCounty').value, t: $('#fTier').value, k: $('#fMarket').value, top: $('#fTop').checked, redev: $('#fRedev').checked, q: $('#fSearch').value.trim().toLowerCase() };
 }
 function applyFilters() {
   const f = readFilters();
   S.filtered = S.data.candidates.filter(c =>
-    (!f.m || c.re_manager === f.m) && (!f.c || c.county === f.c) && (!f.t || c.tier === f.t) &&
+    (f.redev || c.raw_ok) && (!f.m || c.re_manager === f.m) && (!f.c || c.county === f.c) && (!f.t || c.tier === f.t) &&
     (!f.k || (f.k === 'Proven' ? c.market_type.startsWith('Proven') : c.market_type === 'White space')) &&
     (!f.top || c.top50) && (!f.q || (c.intersection_name + ' ' + c.county + ' ' + (c.nearest_7eleven || '')).toLowerCase().includes(f.q)));
-  $('#fCount').textContent = `${S.filtered.length} of ${S.data.candidates.length} candidates`;
+  S.data.candidates.forEach(c => { c.pos = null; });
+  S.filtered.sort((a, b) => b.score - a.score); S.filtered.forEach((c, i) => { c.pos = i + 1; });
+  $('#fCount').textContent = `${S.filtered.length} corners${f.redev ? ' incl. redevelopment' : ' with raw land'}`;
   renderList(); renderTable(); drawCandidates();
 }
 
@@ -109,6 +111,7 @@ function initMap() {
     `<span><i class="dot" style="background:${css('--brand')}"></i>Tier A</span>`,
     `<span><i class="dot" style="background:${css('--brand-tint')}"></i>Tier B</span>`,
     `<span><i class="dot" style="background:${css('--line-strong')}"></i>Tier C</span>`,
+    `<span><i class="dot" style="background:${css('--paper')};border:2px solid ${css('--brand-tint')}"></i>Redevelopment (toggle)</span>`,
     `<span><i class="dot" style="background:${css('--positive')}"></i>7-Eleven built 2018+</span>`,
     `<span><i class="dot" style="background:${css('--ink')}"></i>7-Eleven older</span>`,
     `<span><i class="dot" style="background:${css('--paper')};border:2px solid ${css('--ink')}"></i>Non-fuel</span>`,
@@ -124,8 +127,9 @@ function drawCandidates() {
   const order = [...S.filtered].sort((a, b) => (a.tier < b.tier ? 1 : -1));
   for (const c of order) {
     const st = tierStyle(c.tier);
-    const m = L.circleMarker([c.lat, c.lon], { radius: st.r, color: st.stroke, weight: st.w, fillColor: st.fill, fillOpacity: 1 });
-    m.bindTooltip(`<b>${esc(title(c.intersection_name))}</b><br>Score ${fmt1(c.score)} · Tier ${c.tier}`);
+    const m = c.raw_ok ? L.circleMarker([c.lat, c.lon], { radius: st.r, color: st.stroke, weight: st.w, fillColor: st.fill, fillOpacity: 1 })
+      : L.circleMarker([c.lat, c.lon], { radius: st.r, color: st.fill, weight: 2, fillColor: css('--paper'), fillOpacity: 1 });
+    m.bindTooltip(`<b>${esc(title(c.intersection_name))}</b><br>Score ${fmt1(c.score)} · Tier ${c.tier}${c.raw_ok ? '' : ' · redevelopment'}`);
     m.on('click', () => select(c.id, false));
     candLayer.addLayer(m);
   }
@@ -135,7 +139,7 @@ function drawCandidates() {
 function renderList() {
   const rows = S.filtered.slice(0, 200);
   $('#clist').innerHTML = rows.map(c => `<li data-id="${c.id}" class="${S.sel === c.id ? 'sel' : ''}">
-      <span class="rk num">${c.rank}</span>
+      <span class="rk num">${c.pos}</span>
       <span><span class="nm">${esc(title(c.intersection_name))}</span><br>
         <span class="sub">${esc(c.county)} · ${esc(c.re_manager)} · <span class="pill ${c.market_type.startsWith('Proven') ? 'proven' : 'white'}">${c.market_type.startsWith('Proven') ? 'Proven' : 'White space'}</span>${S.reviews[c.id] ? ' · ' + (S.reviews[c.id].chase === 'yes' ? 'Would chase' : S.reviews[c.id].chase === 'no' ? "Won't chase" : '') : ''}</span></span>
       <span style="text-align:right"><span class="score">${fmt1(c.score)}</span><br><span class="pill ${c.tier}">Tier ${c.tier}</span></span></li>`).join('')
@@ -163,7 +167,7 @@ function renderDetail(c) {
   const w = S.data.meta.weights;
   d.innerHTML = `
     <button class="btn ghost small close" id="dClose" aria-label="Close">Close</button>
-    <div class="eyebrow">Rank ${c.rank} · Tier ${c.tier}${c.top50 ? ' · Top 50' : ''}</div>
+    <div class="eyebrow">${c.pos ? 'Rank ' + c.pos + ' · ' : ''}Tier ${c.tier}${c.top50 ? ' · Top 50' : ''}${c.raw_ok ? '' : ' · Redevelopment'}</div>
     <h3>${esc(title(c.intersection_name))}</h3>
     <div class="sub muted">${esc(c.county)} County · ${esc(MGR_FULL[c.re_manager] || c.re_manager)}</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
@@ -172,6 +176,12 @@ function renderDetail(c) {
     <div style="display:flex;align-items:baseline;gap:8px;margin-top:12px"><span class="score" style="font-size:40px">${fmt1(c.score)}</span><span class="muted">of 100</span></div>
     <div class="bars">${FACTORS.map(([k, l]) => { const v = c['pts_' + k] || 0, mx = w[k]; return `<div class="bar"><span>${l}</span><span class="track"><span class="fill" style="width:${mx ? 100 * v / mx : 0}%"></span></span><span class="v">${fmt1(v)}/${mx}</span></div>`; }).join('')}</div>
     <p class="why">${esc(c.why_here)}</p>
+    <div class="block" style="margin-top:0;border-top:0;padding-top:0">
+      <div class="label">Raw land at the corner</div>
+      ${c.raw_corner ? `<p class="why" style="margin:4px 0">${c.aerial_qa ? '<b>Flagged:</b> ' + esc(c.aerial_qa) + '. ' : ''}${esc(c.raw_best_use)}, ${fmt1(c.raw_best_acres)} ac${c.raw_parcels > 1 ? ` (+${c.raw_parcels - 1} more raw parcel${c.raw_parcels > 2 ? 's' : ''})` : ''}<br><span class="src">Parcel ${esc(c.raw_best_parcel)} · Owner: ${esc(c.raw_best_owner)}</span></p>`
+        : '<p class="why" style="margin:4px 0">No raw parcel of 1.3+ acres touches this corner. It would be a redevelopment site.</p>'}
+      <div class="src">FL DOR 2026 tax roll. Vacant/ag use codes are the county's classification; confirm on the aerial.</div>
+    </div>
     <dl class="kv">
       <dt>New homes 2023–25 within 3 mi</dt><dd>${fmt(c.new_rooftops_3mi)}</dd>
       <dt>Vacant platted lots within 3 mi</dt><dd>${fmt(c.pipeline_lots_3mi)}</dd>
@@ -225,8 +235,8 @@ function renderDetail(c) {
 
 /* ---------- table ---------- */
 const TCOLS = [
-  ['rank', 'Rank', 'n'], ['score', 'Score', 'n'], ['tier', 'Tier'], ['intersection_name', 'Intersection'], ['county', 'County'], ['re_manager', 'Manager'],
-  ['market_type', 'Market'], ['new_rooftops_3mi', 'New homes 3 mi', 'n'], ['pipeline_lots_3mi', 'Platted lots', 'n'], ['new_grocers_3mi', 'New grocers', 'n'],
+  ['pos', 'Rank', 'n'], ['score', 'Score', 'n'], ['tier', 'Tier'], ['intersection_name', 'Intersection'], ['county', 'County'], ['re_manager', 'Manager'],
+  ['market_type', 'Market'], ['raw', 'Raw land'], ['new_rooftops_3mi', 'New homes 3 mi', 'n'], ['pipeline_lots_3mi', 'Platted lots', 'n'], ['new_grocers_3mi', 'New grocers', 'n'],
   ['combined_aadt', 'AADT', 'n'], ['signal', 'Signal'], ['dist_to_7eleven_mi', '7-Eleven mi', 'n'], ['anchors_half_mi', 'Anchors ½ mi'],
   ['nearest_competitor', 'Nearest competitor'], ['access_flag', 'Access flag'], ['review', 'Review'], ['why_here', 'Why here', 'wrap'],
 ];
@@ -236,7 +246,8 @@ function renderTable() {
   $('#rankTable').innerHTML = `<thead><tr>${TCOLS.map(([key, l]) => `<th data-k="${key}" scope="col">${l}${k === key ? (dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('')}</tr></thead>
     <tbody>${rows.map(c => `<tr data-id="${c.id}">${TCOLS.map(([key, , cls]) => {
       let v = c[key];
-      if (key === 'review') v = S.reviews[c.id]?.chase === 'yes' ? 'Would chase' : S.reviews[c.id]?.chase === 'no' ? "Won't chase" : '';
+      if (key === 'raw') v = c.raw_ok ? `${c.raw_best_use}, ${fmt1(c.raw_best_acres)} ac` : (c.aerial_qa ? 'Flagged: no raw land on aerial' : 'None (redevelopment)');
+      else if (key === 'review') v = S.reviews[c.id]?.chase === 'yes' ? 'Would chase' : S.reviews[c.id]?.chase === 'no' ? "Won't chase" : '';
       else if (key === 'intersection_name') v = title(v);
       else if (key === 'market_type') v = String(v).startsWith('Proven') ? 'Proven' : 'White space';
       else if (key === 'dist_to_7eleven_mi' || key === 'score') v = fmt1(v);
@@ -261,7 +272,7 @@ function xlsxBlob(sheets) {
 }
 $('#exportList').onclick = () => {
   const rows = S.filtered.map(c => ({
-    Rank: c.rank, Score: c.score, Tier: c.tier, 'Top 50': c.top50 ? 'Y' : '', Intersection: title(c.intersection_name), County: c.county, 'RE manager': c.re_manager,
+    Rank: c.pos, Score: c.score, 'Raw land at corner': c.raw_ok ? 'Y' : 'N', 'Raw parcel use': c.raw_best_use || '', 'Raw parcel acres': c.raw_best_acres, 'Raw parcel ID': c.raw_best_parcel || '', 'Raw parcel owner': c.raw_best_owner || '', 'Aerial check': c.aerial_qa || '', Tier: c.tier, 'Top 50': c.top50 ? 'Y' : '', Intersection: title(c.intersection_name), County: c.county, 'RE manager': c.re_manager,
     Market: c.market_type, 'Why here': c.why_here, 'New homes 2023-25 (3 mi)': c.new_rooftops_3mi, 'Vacant platted lots (3 mi)': c.pipeline_lots_3mi,
     'Grocers on 2023+ parcels (3 mi)': c.new_grocers_3mi, 'Combined AADT': c.combined_aadt, Signal: c.signal, 'Nearest 7-Eleven (mi)': c.dist_to_7eleven_mi,
     'Nearest 7-Eleven': title(c.nearest_7eleven), 'Anchors 1/2 mi': c.anchors_half_mi, 'Nationals 1/2 mi': c.nationals_half_mi, 'Nearest competitor': c.nearest_competitor,
@@ -360,6 +371,7 @@ async function wordPack(m) {
       row('Combined traffic, vehicles per day (FDOT 2025)', c.combined_aadt == null ? 'No count' : fmt(c.combined_aadt)),
       row('Nearest 7-Eleven', `${fmt1(c.dist_to_7eleven_mi)} mi`),
       row('Anchors within ½ mile', c.anchors_half_mi || 'None'),
+      row('Raw land at the corner (FL DOR)', c.raw_ok ? `${c.raw_best_use}, ${fmt1(c.raw_best_acres)} acres` : 'None'),
       row('Signalized intersection', c.signal),
       row('Market', c.market_type),
     ] }));
@@ -463,7 +475,7 @@ function renderMethods() {
   const wo = m.weight_options || [];
   $('#methods').innerHTML = `
     <section><div class="eyebrow">How the score works</div><h2>Weights in use</h2>
-      <p class="muted">Option B, approved by Ross on November 10, 2026 after the backtest. Hard filters first: 2+ miles from any 7-Eleven or Speedway fuel store, and an intersection of two FDOT arterial or collector roads.</p>
+      <p class="muted">Option B, approved by Ross on November 10, 2026 after the backtest. Filters first: 2+ miles from any 7-Eleven or Speedway fuel store, an intersection of two FDOT arterial or collector roads, and (by default, approved November 11) a raw parcel of 1.3+ acres touching the corner.</p>
       <div class="tablewrap"><table class="grid"><thead><tr><th>Factor</th><th>Points</th></tr></thead><tbody>${FACTORS.map(([k, l]) => `<tr><td>${l}</td><td class="n">${m.weights[k]}</td></tr>`).join('')}</tbody></table></div></section>
     <section><div class="eyebrow">Does it find where 7-Eleven builds?</div><h2>Backtest</h2>
       <p class="muted">The ${bt.length} pilot 7-Elevens built since 2018 were scored at their own corners and ranked against all ${fmt(m.counts.intersections)} pilot intersections. Rooftop counts are as of today, not when 7-Eleven chose each site.</p>
@@ -482,7 +494,7 @@ function renderMethods() {
 function candBrief(c) {
   return { id: c.id, rank: c.rank, score: c.score, tier: c.tier, intersection: title(c.intersection_name), county: c.county, re_manager: c.re_manager, market: c.market_type,
     new_homes_2023_25_3mi: c.new_rooftops_3mi, vacant_platted_lots_3mi: c.pipeline_lots_3mi, grocers_on_2023plus_parcels_3mi: c.new_grocers_3mi,
-    combined_aadt: c.combined_aadt, signal: c.signal, miles_to_nearest_7eleven: Number(fmt1(c.dist_to_7eleven_mi)), nearest_7eleven: title(c.nearest_7eleven),
+    combined_aadt: c.combined_aadt, signal: c.signal, raw_land_at_corner: c.raw_ok ? `${c.raw_best_use}, ${c.raw_best_acres} ac` : 'none (redevelopment)', miles_to_nearest_7eleven: Number(fmt1(c.dist_to_7eleven_mi)), nearest_7eleven: title(c.nearest_7eleven),
     anchors_half_mi: c.anchors_half_mi, nationals_half_mi: c.nationals_half_mi, nearest_competitor: c.nearest_competitor, access_flag: c.access_flag,
     deal_maker_review: S.reviews[c.id] ? { chase: S.reviews[c.id].chase, note: S.reviews[c.id].note } : null };
 }
@@ -509,9 +521,10 @@ async function ask() {
       re_manager: { type: 'string', enum: MANAGERS }, county: { type: 'string', description: 'One of: ' + [...new Set(S.data.candidates.map(c => c.county))].join(', ') },
       tier: { type: 'string', enum: ['A', 'B', 'C'] }, market: { type: 'string', enum: ['Proven', 'White space'] },
       min_new_homes: { type: 'number' }, min_aadt: { type: 'number' }, min_miles_to_7eleven: { type: 'number' }, requires_anchor: { type: 'boolean' },
+      include_redevelopment: { type: 'boolean', description: 'Include corners with no raw 1.3+ acre parcel. Default false.' }, min_raw_acres: { type: 'number' },
       name_contains: { type: 'string' }, sort: { type: 'string', enum: ['score', 'new_rooftops_3mi', 'combined_aadt', 'dist_to_7eleven_mi'] }, limit: { type: 'number' } } },
     execute(a) {
-      let r = S.data.candidates.filter(c => (!a.re_manager || c.re_manager === a.re_manager) && (!a.county || c.county.toLowerCase() === String(a.county).toLowerCase())
+      let r = S.data.candidates.filter(c => (a.include_redevelopment || c.raw_ok) && (!a.min_raw_acres || (c.raw_best_acres || 0) >= a.min_raw_acres) && (!a.re_manager || c.re_manager === a.re_manager) && (!a.county || c.county.toLowerCase() === String(a.county).toLowerCase())
         && (!a.tier || c.tier === a.tier) && (!a.market || (a.market === 'Proven') === c.market_type.startsWith('Proven'))
         && (!a.min_new_homes || c.new_rooftops_3mi >= a.min_new_homes) && (!a.min_aadt || (c.combined_aadt || 0) >= a.min_aadt)
         && (!a.min_miles_to_7eleven || c.dist_to_7eleven_mi >= a.min_miles_to_7eleven) && (!a.requires_anchor || c.anchors_half_mi)
@@ -520,7 +533,7 @@ async function ask() {
       return { total_matches: r.length, rows: r.slice(0, Math.min(a.limit || 10, 25)).map(candBrief) };
     },
   }];
-  const prompt = `You answer questions from ECP Partners' deal makers about scored 7-Eleven candidate corners. Use the search_candidates tool; never invent corners or numbers. Answer in plain sentences, under 160 words, naming intersections with their rank and score. Say when a number is an inference (grocer ages, "proven" market) or missing (no traffic count). Scoring: new homes 30, traffic 25, grocery 10, gap to 7-Eleven 10, retail node 10, signal 10, platted lots 5.
+  const prompt = `You answer questions from ECP Partners' deal makers about scored 7-Eleven candidate corners. Use the search_candidates tool; never invent corners or numbers. Answer in plain sentences, under 160 words, naming intersections with their rank and score. Say when a number is an inference (grocer ages, "proven" market) or missing (no traffic count). By default only corners with a raw (vacant or agricultural) parcel of 1.3+ acres count; about 72% of Florida 7-Eleven build-to-suits were built on raw land. Scoring: new homes 30, traffic 25, grocery 10, gap to 7-Eleven 10, retail node 10, signal 10, platted lots 5.
 Question: ${q}`;
   try {
     await S.sample(prompt, { tools, modelTier: 'default', onText: ({ text }) => { out.textContent = text; } });
@@ -547,10 +560,10 @@ window.addEventListener('hashchange', route);
   try { S.data = await loadData(); }
   catch { $('#metaLine').textContent = 'The data files could not be loaded.'; return; }
   const m = S.data.meta;
-  $('#metaLine').innerHTML = `Pilot: 8 counties · ${fmt(m.counts.candidates)} candidates (${m.counts.tierA} Tier A) · Data built ${esc(m.built)}`;
+  $('#metaLine').innerHTML = `Pilot: 8 counties · ${fmt(m.counts.raw_ok)} raw-land corners (${m.counts.tierA_raw} Tier A) · ${fmt(m.counts.candidates)} incl. redevelopment · Data built ${esc(m.built)}`;
   const counties = [...new Set(S.data.candidates.map(c => c.county))].sort();
   $('#fCounty').insertAdjacentHTML('beforeend', counties.map(c => `<option>${esc(c)}</option>`).join(''));
-  ['#fManager', '#fCounty', '#fTier', '#fMarket', '#fTop'].forEach(s => $(s).addEventListener('change', applyFilters));
+  ['#fManager', '#fCounty', '#fTier', '#fMarket', '#fTop', '#fRedev'].forEach(s => $(s).addEventListener('change', applyFilters));
   $('#fSearch').addEventListener('input', () => { clearTimeout(boot._t); boot._t = setTimeout(applyFilters, 200); });
   initMap(); applyFilters(); renderPacks(); renderMethods(); renderLog();
   $('#askBtn').onclick = ask; $('#askInput').addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });

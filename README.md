@@ -21,3 +21,4 @@ Front end lives in `artifact/` (index.html, app.css, app.js, vendor/leaflet.css)
 `11` + `12_artifact_data.py out "<source.xlsx>" "<step2.xlsx>" <dir>/data` and published to the claude.ai artifact
 `b0ece350-ae01-4c2d-9013-37945df29fd0` ("7-Eleven Target Area Finder") with publish_files (mode patch, data/*.json only).
 Capabilities: db (collections: reviews, packs, submittals), user (profile), sample, downloads.
+11. `16_raw_corners.py dl/dor_x out out/candidates_scored_optionB.csv out/candidates_raw.csv <counties...>` — raw-land corner test (default filter, Nov 11 2026). `aerial_qa.csv` holds manual aerial-check exclusions.

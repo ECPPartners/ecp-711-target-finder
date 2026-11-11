@@ -34,14 +34,31 @@ def main(out, src_xlsx, step2_xlsx, dest):
     inbox = lambda df: df[(df.lon > minx - pad) & (df.lon < maxx + pad) & (df.lat > miny - pad) & (df.lat < maxy + pad)]
 
     # candidates
-    c = pd.read_csv(os.path.join(out, 'candidates_scored_optionB.csv'))
+    c = pd.read_csv(os.path.join(out, 'candidates_raw.csv'))
     c['id'] = [hashlib.md5(f'{a:.4f},{b:.4f}'.encode()).hexdigest()[:10] for a, b in zip(c.lat, c.lon)]
-    top_ids = set(pd.read_excel(step2_xlsx, sheet_name='Top 50 (Option B)').pipe(lambda t: [hashlib.md5(f'{a:.4f},{b:.4f}'.encode()).hexdigest()[:10] for a, b in zip(t.lat, t.lon)]))
-    c['top50'] = c.id.isin(top_ids)
+    qa = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'aerial_qa.csv'))
+    qa['id'] = [hashlib.md5(f'{a:.4f},{b:.4f}'.encode()).hexdigest()[:10] for a, b in zip(qa.lat, qa.lon)]
+    c['aerial_qa'] = c.id.map(dict(zip(qa.id, qa.qa))).fillna('')
+    c['raw_ok'] = c.raw_corner & (c.aerial_qa == '')
+    # Top 50: highest scores among raw-land corners, no two within 1 mile
+    import math
+    picked, P = [], []
+    for i, x in c[c.raw_ok].sort_values('score', ascending=False).iterrows():
+        y = (x.lat * 111320, x.lon * 111320 * math.cos(math.radians(x.lat)))
+        if all(math.hypot(y[0] - a, y[1] - b) > 1609.344 for a, b in P): picked.append(i); P.append(y)
+        if len(picked) == 50: break
+    c['top50'] = c.index.isin(picked)
+    c['raw_rank'] = c[c.raw_ok].score.rank(ascending=False, method='first')
+    # tiers are set within the default (raw-land) pool: A = top 15%, B = next 25%, C = rest; redevelopment corners keep
+    # their original all-candidate tier for reference
+    q = c[c.raw_ok].score.rank(pct=True)
+    c.loc[c.raw_ok, 'tier'] = np.where(q >= 0.85, 'A', np.where(q >= 0.60, 'B', 'C'))
+    c['rank'] = c.score.rank(ascending=False, method='first').astype(int)
     c['signal'] = np.where(c.fdot_signal, 'Yes', np.where(c.signal_unknown, 'Unknown', 'No'))
     cols = ['id', 'rank', 'score', 'tier', 'top50', 'intersection_name', 'county', 're_manager', 'market_type', 'why_here', 'new_rooftops_3mi',
             'pipeline_lots_3mi', 'new_grocers_3mi', 'combined_aadt', 'signal', 'dist_to_7eleven_mi', 'nearest_7eleven', 'anchors_half_mi',
-            'nationals_half_mi', 'nearest_competitor', 'access_flag', 'max_trucks_per_day'] + ['pts_' + k for k in WEIGHTS] + ['lat', 'lon']
+            'nationals_half_mi', 'nearest_competitor', 'access_flag', 'max_trucks_per_day', 'raw_ok', 'raw_corner', 'raw_parcels', 'raw_best_acres',
+            'raw_best_use', 'raw_best_parcel', 'raw_best_owner', 'aerial_qa', 'raw_rank'] + ['pts_' + k for k in WEIGHTS] + ['lat', 'lon']
     c['access_flag'] = c.access_flag.fillna('')
     dump(recs(c, cols), os.path.join(dest, 'candidates.json'))
 
@@ -104,13 +121,19 @@ def main(out, src_xlsx, step2_xlsx, dest):
         'built': pd.Timestamp.today().strftime('%Y-%m-%d'),
         'weights': WEIGHTS,
         'pilot': PILOT,
-        'counts': {'intersections': 2459, 'candidates': int(len(c)), 'tierA': int((c.tier == 'A').sum()), 'tierB': int((c.tier == 'B').sum()),
+        'counts': {'intersections': 2459, 'candidates': int(len(c)), 'raw_ok': int(c.raw_ok.sum()), 'tierA': int((c.tier == 'A').sum()), 'tierA_raw': int(((c.tier == 'A') & c.raw_ok).sum()), 'tierB_raw': int(((c.tier == 'B') & c.raw_ok).sum()), 'tierB': int((c.tier == 'B').sum()),
                    'stores_pilot': int(len(net)), 'competitors': int(len(comp))},
         'weight_options': recs(x['Weight Options'].dropna(subset=['Weights']).iloc[:2], list(x['Weight Options'].columns[:7])),
         'method': recs(x['Method & Weights'], ['Item', 'Method']),
         'sources': recs(pd.read_excel(src_xlsx, sheet_name='Sources & Dates'), ['Dataset', 'Source', 'As of', 'Data class']),
         'gaps': recs(pd.read_excel(src_xlsx, sheet_name='Data Gaps'), ['Gap', 'Detail', 'Fix']),
     }
+    for m_ in meta['method']:
+        if m_['Item'] == 'Tiers': m_['Method'] = 'Within the default raw-land pool: A = top 15% of score, B = next 25%, C = rest. Redevelopment corners keep their tier among all candidates.'
+        if m_['Item'] == 'Top 50': m_['Method'] = 'Highest scores among raw-land corners (after the aerial check), no two within 1 mile of each other.'
+    meta['method'].insert(2, {'Item': 'Raw-land filter (default on)',
+        'Method': 'Shown by default only if a raw parcel of 1.3+ acres touches the corner (within 50 m): vacant residential/commercial/industrial/institutional or acreage with no buildings, or agricultural land; FL DOR 2026 tax roll. Excludes public, conservation, HOA/CDD and very low-value remnant parcels (ponds, buffers). Approved by Ross Nov 11, 2026 after the build-to-suit land check: ~72% of Florida 7-Eleven BTS deals (rent $350K+) were built on raw land. Turn the filter off to see redevelopment corners. A top-60 aerial check removed 3 corners with no raw land visible.'})
+    meta['gaps'].append({'Gap': 'Raw-land filter not backtestable', 'Detail': 'Recent 7-Eleven sites are built now, so today\'s parcel data can\'t show they were raw before. Evidence for the filter is the aerial land check of 152 tracker BTS sites.', 'Fix': 'Track in the submittal log whether each sent site was raw or redevelopment.'})
     dump(meta, os.path.join(dest, 'meta.json'))
 
 if __name__ == '__main__':
