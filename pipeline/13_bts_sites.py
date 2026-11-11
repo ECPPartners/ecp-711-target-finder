@@ -16,21 +16,10 @@ def toks(s):
     return set(re.findall(r'[a-z]{3,}|\d+', str(s).lower())) - STOP
 
 def tracker_rows(xlsx):
-    wb = openpyxl.load_workbook(xlsx, read_only=True, data_only=True)
-    out = []
-    for tab in ['On Market', 'Sold', 'Pulled from Market']:
-        data = [r for r in wb[tab].iter_rows(values_only=True)]
-        start = 1 if data and data[0] and data[0][0] == 'Tenant' else 0
-        if start == 0: start = 1 if all(v is None for v in (data[0] or [])) else 0
-        for r in data[start:]:
-            if not r or not r[1] or r[0] in (None, 'Tenant'): continue
-            d = dict(zip(HDR, r))
-            try: rent = float(d['Annual Rent'])
-            except (TypeError, ValueError): continue
-            out.append(dict(tab=tab, tenant=d['Tenant'], address=str(d['Property Address']).strip(), city=str(d['City'] or '').strip(),
-                            state=str(d['State'] or '').strip().upper(), date=str(d['Date'])[:10], annual_rent=rent,
-                            year_built=d['Year Built'], building_sf=d['Building SF'], acres=d['Land (Acres)'], lease_type=d['Lease Type']))
-    return pd.DataFrame(out)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from tracker_parse import read_tracker
+    t = read_tracker(xlsx)
+    return t[t.annual_rent.notna()].rename(columns={'tracker_tab': 'tab'})
 
 def api_stores(atp):
     rows = []
@@ -83,7 +72,7 @@ def main(xlsx, atp, out):
         if not m: m = census(r.address, r.city, r.state)
         lat.append(m[0] if m else None); lon.append(m[1] if m else None); how.append(m[2] if m else 'UNRESOLVED')
     b['lat'], b['lon'], b['location_source'] = lat, lon, how
-    b.to_csv(os.path.join(out, 'bts_sites.csv'), index=False)
+    b.to_csv(os.path.join(out, os.environ.get('BTS_OUT', 'bts_sites.csv')), index=False)
     print(b.location_source.str.split(':| \\(').str[0].value_counts().to_string())
     print(b[b.lat.isna()][['state', 'city', 'address']].to_string())
 

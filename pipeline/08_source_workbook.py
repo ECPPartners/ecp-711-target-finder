@@ -93,7 +93,7 @@ def main(out, xlsx):
         ['Traffic & trucks', 'FDOT AADT TDA layer (AADT, truck factor)', 'Count year 2025, pulled ' + TODAY, 'Hard data'],
         ['Signals', 'FDOT Traffic Signal Locations TDA', 'Pulled ' + TODAY, 'Hard data; appears to cover state road system only'],
         ['Rooftops', 'FL DOR NAL tax roll + parcel map', '2026 Final roll (year built through 2025)', 'Hard data; 0.2-6.6% of parcels per county not on the parcel map (newest splits undercounted)'],
-        ['ECP sales tracker', '7-Eleven 2025 Sales Tracker (12/1/25)', '2025-12-01', 'ECP data; newer version pending from Ross'],
+        ['ECP sales tracker', '7-Eleven 2026 Sales Tracker (11/11/26)', '2026-11-11', 'ECP data'],
         ['RE manager territories', '7-Eleven FL-Southeast Development Team Map', 'Feb 2026', 'ECP data'],
     ], columns=['Dataset', 'Source', 'As of', 'Data class'])
     gaps = pd.DataFrame([

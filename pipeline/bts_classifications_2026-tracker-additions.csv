@@ -1,0 +1,54 @@
+idx,class,note
+0,R,grass field
+1,U,pin on existing building; new store not visible
+2,DUP,same site as 2025 list (Bonney Lake)
+3,R?,field; store not visible in latest
+4,R?,wooded; store not visible in latest
+5,DUP,same site as 2025 list (Red Oak)
+6,R,wooded
+7,R?,farm field; store not visible in latest
+9,R?,grass lot; footprint uncertain
+11,R,cleared/graded land
+12,U,store not identifiable
+14,R,vacant brush lot
+15,U,store not identifiable
+17,R?,vacant dirt lot at corner; store not visible
+18,U,store not identifiable
+19,U,store not identifiable
+20,R,brush/wooded; under construction
+22,R,wooded
+23,R,vacant grass/trees at corner
+24,R,wooded
+25,U,store already visible in before image
+26,R?,brush; store not visible in latest
+27,D,existing building/yard at pin
+28,D,existing small commercial building
+29,D,existing commercial building at corner
+30,U,store not identifiable
+31,D?,rural house lots on footprint
+32,R,vacant brush lot
+33,U,store not identifiable
+34,R?,vacant field; store not visible
+35,R,cleared/disturbed vacant land
+36,R,grass field
+40,R,graded vacant land
+41,R,vacant brush at corner
+42,R,open field
+43,R,pine woods
+44,D,existing gas station rebuilt
+45,DUP,same site as 2025 list (Hearne)
+47,D,existing commercial building
+48,R,farm field
+49,U,store not identifiable
+50,R,farm field
+51,R?,field; store not visible in latest
+52,R,vacant field
+53,R?,rural field; store not visible
+54,R,grass/wooded
+55,U,store not identifiable
+56,R,citrus grove
+57,R,wooded lot
+58,DUP,same site as 2025 list (Canyon Lake)
+59,DUP,same site as #51
+60,U,store not identifiable
+61,R?,field; store not visible

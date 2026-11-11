@@ -3,7 +3,7 @@ Usage: python3 -I 05_tracker_geocode.py <tracker.xlsx> <out.csv>
 Rows with intersection-style addresses (e.g. 'SWC Hwy 44 & Abrams Rd') are geocoded as intersections
 via the Census geocoder where possible; unresolved rows are left blank and flagged.
 """
-import sys, re, time, requests, openpyxl, pandas as pd
+import sys, os, re, time, requests, openpyxl, pandas as pd
 
 GEO = "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress"
 
@@ -19,22 +19,12 @@ def geocode(addr):
     return None, None, None
 
 def main(xlsx, out):
-    wb = openpyxl.load_workbook(xlsx, read_only=True, data_only=True)
-    rows = []
-    for sheet, datecol in [('On Market', 'Listed Date'), ('Sold', 'Sold Date'), ('Pulled from Market', 'Listed Date')]:
-        data = [r for r in wb[sheet].iter_rows(values_only=True)]
-        hdr_i = next(i for i, r in enumerate(data) if r and r[0] == 'Tenant') if any(r and r[0] == 'Tenant' for r in data) else 0
-        hdr = [str(h).strip() if h else f'col{i}' for i, h in enumerate(data[hdr_i])] if data[hdr_i][0] == 'Tenant' else \
-              ['Tenant', 'Property Address', 'City', 'State', datecol, 'Days on Market', 'Price', 'Cap Rate', 'Annual Rent',
-               'Lease Term Remaining', 'Lease Type', 'LL Responsibilities', 'Year Built', 'Building SF', 'Land (Acres)',
-               'Rent/SF', 'Price/SF', 'Increases']
-        for r in data[hdr_i + 1:]:
-            if not r or not r[3] or str(r[3]).strip() != 'FL': continue
-            d = dict(zip(hdr, r))
-            rows.append({'tracker_tab': sheet, 'address': str(d.get('Property Address') or '').strip(),
-                         'city': str(d.get('City') or '').strip(), 'date': d.get(datecol) or d.get('Sold Date') or d.get('Listed Date'),
-                         'year_built': d.get('Year Built') or d.get('Year Built/Renovated'), 'building_sf': d.get('Building SF'),
-                         'acres': d.get('Land (Acres)'), 'cap_rate': d.get('Cap Rate'), 'annual_rent': d.get('Annual Rent')})
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from tracker_parse import read_tracker
+    t = read_tracker(xlsx)
+    t = t[t.state == 'FL']
+    rows = [dict(tracker_tab=r.tracker_tab, address=r.address, city=r.city, date=r.date, year_built=r.year_built, building_sf=r.building_sf,
+                 acres=r.acres, cap_rate=r.cap_rate, annual_rent=r.annual_rent) for r in t.itertuples()]
     df = pd.DataFrame(rows).drop_duplicates(subset=['address', 'city', 'tracker_tab'])
     lat, lon, matched = [], [], []
     for _, r in df.iterrows():
