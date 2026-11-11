@@ -1,0 +1,153 @@
+idx,class,note
+0,D,existing station/building at pin before
+1,R,grass field
+5,R,wooded
+6,D,existing commercial building
+7,D,existing commercial building/parking
+8,R,farm field
+9,R,field
+10,R,open grass; small structure nearby
+11,D,existing building in shopping strip
+12,R,open field
+13,R?,wooded; store not yet in latest imagery
+14,D,existing commercial buildings
+15,U,pin on road; store location unclear
+16,D?,existing buildings; store not visible in latest
+17,R,vacant cleared lot
+18,U,no store visible; pin uncertain
+19,R,wooded; under construction in latest
+20,U,urban corner; store not identifiable
+21,R,vacant field
+22,U,store already present in before image
+23,R,raw/graded land in new subdivision
+24,R,graded land in new master-planned development
+26,R,open pasture
+27,U,pin on existing small building; new store not visible
+28,R,vacant desert pad in developed area
+29,D,existing commercial buildings
+30,D,existing commercial buildings
+31,U,unclear which structure is the store
+32,D,existing commercial building
+33,R,wooded
+34,R,wooded lot (store at corner)
+35,D?,old paved pad / prior use remnants
+36,D,existing commercial building
+37,R,vacant grass outparcel of shopping center
+38,R,farm field
+39,U,urban corner; store not identifiable
+41,R,vacant land at corner
+42,R,brush/wooded
+43,R,vacant cleared infill lot
+44,R,open field; not yet built in latest
+45,D,existing commercial building
+46,R,cleared/graded vacant land
+47,R,vacant grass/trees at corner
+49,R,vacant cleared land
+50,D,existing commercial buildings
+51,U,mixed; unclear footprint
+52,D,existing buildings/storage yard
+53,R,open field
+54,R,vacant grass
+56,R,farm field
+57,D,existing building at site
+58,R,grass lot
+60,U,store not identifiable
+61,R,wooded
+62,R,vacant grass near interchange
+63,D,existing warehouse building demolished
+64,D,existing commercial development
+65,U,store already visible in before image
+66,R?,farm field; store not visible in latest
+68,R?,wooded; store not visible in latest
+69,R,vacant grass
+70,D?,existing building at pin; new store not visible
+72,R,open field
+73,D?,gravel truck/storage yard
+75,R,farm field
+76,D?,small structures/yard (rural residential/nursery)
+77,R,graded vacant strip
+79,D,existing commercial buildings/parking
+80,U,store not identifiable
+82,R?,vacant dirt lot; store not visible in latest
+83,R,vacant brush at corner
+84,R,grass field
+85,R,vacant dirt field at corner
+86,U,pin in woods; geocode uncertain
+87,R,vacant field
+88,U,store not identifiable
+89,R,cleared vacant land
+90,DUP,same site as #9
+91,U,store not identifiable
+92,D,existing commercial building at corner
+93,U,store already visible in before image
+95,D,existing commercial lot
+96,R,wooded
+97,D,existing buildings
+98,R,grass/trees
+99,D,existing commercial building redeveloped
+100,R,field with minor rural structure
+101,R,wooded
+102,D,existing small commercial building/lot
+103,R,vacant lot in subdivision
+104,D,existing commercial building
+105,R,vacant brush at corner
+107,R,wooded
+108,R,pine woods
+109,D,existing commercial building
+111,R,wooded lot
+112,D,existing commercial building at site
+113,U,store not identifiable
+114,R,graded land in new master-planned development
+116,U,store not identifiable
+117,U,store not identifiable
+118,DUP,same site as #20
+119,R,graded land in new development
+120,DUP,same site as #11
+121,R,vacant grass/trees
+122,U,store not identifiable
+123,U,store not identifiable
+124,R,vacant field
+125,D,existing commercial buildings
+126,R?,vacant cleared urban lot (possibly former use)
+127,D,existing commercial building
+128,R,wooded/grass
+129,U,store not identifiable
+130,D,existing commercial building
+131,D,existing large commercial building
+133,D,existing small buildings
+134,R,vacant lot in commercial park
+135,U,store not identifiable
+136,D,existing small commercial building
+137,R,wooded/vacant
+138,D,existing station/commercial building
+140,R,farm field
+141,R,vacant lot with trees
+142,R,vacant grass/trees
+143,R,graded land in new development
+144,D,existing restaurant building
+145,R,cleared vacant land
+147,R,vacant field at corner
+148,D,existing small building
+149,D,existing commercial buildings
+150,R,wooded corner
+151,R,wooded lot
+153,U,store already visible in before image
+154,U,store already visible in before image
+155,U,store already visible in before image
+156,R,graded land in new development
+157,R,pine woods
+158,U,store not identifiable
+159,R,grassy treed lot
+160,R?,vacant desert lot; store not visible in latest
+161,R,farm field
+162,U,unclear; existing building at corner both dates
+163,R,wooded
+164,R,vacant grass corner lot
+165,U,residential area; store not identifiable
+166,DUP,same site as #13
+167,U,store not identifiable
+168,DUP,likely same site as #8
+169,R,vacant field
+170,R,wooded/vacant
+171,R,farm field
+172,R,wooded
