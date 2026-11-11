@@ -5,7 +5,7 @@ Layers: AADT (with truck factor), functional classification, local road names, t
 import sys, os, json, requests
 
 FDOT = "https://services1.arcgis.com/O1JpcwDW8sjYuddV/arcgis/rest/services"
-COUNTY_LIKE = ['%DUVAL%', '%JOHNS%', '%CLAY%', '%VOLUSIA%', '%BREVARD%', '%PASCO%', '%HILLSBOROUGH%', '%LUCIE%']
+COUNTY_LIKE = ['%DUVAL%', '%JOHNS%', '%CLAY%', '%VOLUSIA%', '%BREVARD%', '%PASCO%', '%HILLSBOROUGH%', '%LUCIE%', '%POLK%']
 LAYERS = {
     'aadt': 'Annual_Average_Daily_Traffic_TDA',
     'funclass': 'Functional_Classification_TDA',

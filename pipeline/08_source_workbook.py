@@ -7,7 +7,7 @@ import sys, os, glob, json
 import pandas as pd, geopandas as gpd, numpy as np
 
 PILOT = {'Duval': 'Bauer', 'St Johns': 'Bauer', 'Clay': 'Bauer', 'Volusia': 'Bauer', 'Brevard': 'Bauer',
-         'Pasco': 'Golden', 'Hillsborough': 'Golden', 'St Lucie': 'Antonacci'}
+         'Pasco': 'Golden', 'Hillsborough': 'Golden', 'St Lucie': 'Antonacci', 'Polk': 'Polk'}
 TODAY = pd.Timestamp.today().strftime('%Y-%m-%d')
 
 def load_parcels(out):

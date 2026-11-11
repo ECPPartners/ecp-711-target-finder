@@ -4,7 +4,7 @@
   --brand: #3333cc; --brand-strong: #222288; --brand-tint: #b2b2ee; --brand-wash: #ececfa; --on-brand: #ffffff;
   --line: #e8e6e6; --line-strong: #8c8e91; --positive: #407c51; --positive-wash: #e6f0e9;
   --warn: #9a5b13; --warn-wash: #f7ecdc; --comp: #b4542d;
-  --mgr-bauer: #dfe0f6; --mgr-golden: #dcebe0; --mgr-antonacci: #f3e6cf;
+  --mgr-bauer: #dfe0f6; --mgr-golden: #dcebe0; --mgr-antonacci: #f3e6cf; --mgr-polk: #e6e0f0;
   --display: "Source Serif 4", "Source Serif Pro", Georgia, serif;
   --sans: Montserrat, "Avenir Next", "Helvetica Neue", Arial, sans-serif;
   --shadow: 0 8px 24px rgba(28,26,66,0.10);
@@ -16,7 +16,7 @@
     --brand: #8a8ade; --brand-strong: #b2b2ee; --brand-tint: #514f71; --brand-wash: #26244f; --on-brand: #0e0d21;
     --line: #2e2c5a; --line-strong: #8280a1; --positive: #7fa88b; --positive-wash: #15291b;
     --warn: #e0b067; --warn-wash: #3a2a12; --comp: #e08a63;
-    --mgr-bauer: #24234f; --mgr-golden: #17301f; --mgr-antonacci: #3a2e17;
+    --mgr-bauer: #24234f; --mgr-golden: #17301f; --mgr-antonacci: #3a2e17; --mgr-polk: #2a2440;
     --shadow: 0 8px 24px rgba(0,0,0,0.45); color-scheme: dark;
   }
 }
@@ -25,7 +25,7 @@
   --brand: #8a8ade; --brand-strong: #b2b2ee; --brand-tint: #514f71; --brand-wash: #26244f; --on-brand: #0e0d21;
   --line: #2e2c5a; --line-strong: #8280a1; --positive: #7fa88b; --positive-wash: #15291b;
   --warn: #e0b067; --warn-wash: #3a2a12; --comp: #e08a63;
-  --mgr-bauer: #24234f; --mgr-golden: #17301f; --mgr-antonacci: #3a2e17;
+  --mgr-bauer: #24234f; --mgr-golden: #17301f; --mgr-antonacci: #3a2e17; --mgr-polk: #2a2440;
   --shadow: 0 8px 24px rgba(0,0,0,0.45); color-scheme: dark;
 }
 

@@ -5,7 +5,7 @@ import sys, os, glob, json, hashlib
 import numpy as np, pandas as pd, geopandas as gpd
 
 PILOT = {'Duval': 'Bauer', 'St Johns': 'Bauer', 'Clay': 'Bauer', 'Volusia': 'Bauer', 'Brevard': 'Bauer',
-         'Pasco': 'Golden', 'Hillsborough': 'Golden', 'St Lucie': 'Antonacci'}
+         'Pasco': 'Golden', 'Hillsborough': 'Golden', 'St Lucie': 'Antonacci', 'Polk': 'Polk'}
 WEIGHTS = {'new_rooftops': 30, 'rooftop_pipeline': 5, 'new_grocery': 10, 'traffic': 25, 'gap_to_7eleven': 10, 'retail_node': 10, 'signal': 10}
 FC_NAME = {'04': 'Rural principal arterial', '06': 'Rural minor arterial', '07': 'Rural major collector', '08': 'Rural minor collector',
            '14': 'Urban principal arterial', '16': 'Urban minor arterial', '17': 'Urban major collector', '18': 'Urban minor collector',

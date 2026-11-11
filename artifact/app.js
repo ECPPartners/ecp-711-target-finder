@@ -2,8 +2,8 @@
 (() => {
 'use strict';
 const MI = 1609.344;
-const MANAGERS = ['Bauer', 'Golden', 'Antonacci'];
-const MGR_FULL = { Bauer: 'Jim Bauer · Northeast Florida', Golden: 'Richard Golden · Tampa Bay & North', Antonacci: 'Chris Antonacci · Southwest & Southeast Florida' };
+const MANAGERS = ['Bauer', 'Golden', 'Antonacci', 'McDonald', 'Polk west (TBD)'];
+const MGR_FULL = { Bauer: 'Jim Bauer · Northeast Florida', Golden: 'Richard Golden · Tampa Bay & North', Antonacci: 'Chris Antonacci · Southwest & Southeast Florida', McDonald: 'Jim McDonald · Central Florida (Polk east of US-27)', 'Polk west (TBD)': 'Polk west of US-27 · manager not on the Feb 2026 map' };
 const FACTORS = [
   ['new_rooftops', 'New rooftops'], ['traffic', 'Traffic'], ['new_grocery', 'New grocery'], ['gap_to_7eleven', 'Gap to 7-Eleven'],
   ['retail_node', 'Retail node'], ['signal', 'Signal'], ['rooftop_pipeline', 'Platted lots'],
@@ -65,7 +65,7 @@ function tierStyle(t) {
 }
 function initMap() {
   map = L.map('map', { preferCanvas: true, zoomSnap: 0.5, attributionControl: false }).setView([28.9, -81.6], 7);
-  const mgrFill = { Bauer: css('--mgr-bauer'), Golden: css('--mgr-golden'), Antonacci: css('--mgr-antonacci') };
+  const mgrFill = { Bauer: css('--mgr-bauer'), Golden: css('--mgr-golden'), Antonacci: css('--mgr-antonacci'), Polk: css('--mgr-polk') };
   layers.counties = L.geoJSON(S.data.counties, {
     style: f => ({ color: f.properties.pilot ? css('--line-strong') : css('--line'), weight: f.properties.pilot ? 1.2 : 0.6,
       fillColor: f.properties.pilot ? mgrFill[f.properties.manager] : css('--paper'), fillOpacity: f.properties.pilot ? 0.8 : 0.4 }),
@@ -73,7 +73,7 @@ function initMap() {
   }).addTo(map);
   layers.countyLabels = L.layerGroup(S.data.counties.features.filter(f => f.properties.pilot).map(f => {
     const c = L.geoJSON(f).getBounds().getCenter();
-    return L.marker(c, { icon: L.divIcon({ className: 'countylabel', html: esc(f.properties.county) + '<br>' + esc(f.properties.manager), iconSize: [120, 30], iconAnchor: [60, 15] }), interactive: false });
+    return L.marker(c, { icon: L.divIcon({ className: 'countylabel', html: esc(f.properties.county) + '<br>' + esc(f.properties.manager === 'Polk' ? 'McDonald (E) / TBD (W)' : f.properties.manager), iconSize: [120, 30], iconAnchor: [60, 15] }), interactive: false });
   })).addTo(map);
   const rv = { interstate: [css('--ink-muted'), 2.2], arterial: [css('--ink-muted'), 1.2], collector: [css('--line-strong'), 0.7] };
   layers.roads = L.geoJSON(S.data.roads, { style: f => ({ color: rv[f.properties.cls][0], weight: rv[f.properties.cls][1], opacity: 0.75 }), interactive: false }).addTo(map);
@@ -428,7 +428,7 @@ function openSubForm(pre = {}) {
     <label class="full">Candidate intersection (optional)
       <select id="sCand"><option value="">Not from the list</option>${S.data.candidates.slice().sort((a, b) => a.intersection_name.localeCompare(b.intersection_name)).map(c => `<option value="${c.id}" ${(s.candidateId || cand?.id) === c.id ? 'selected' : ''}>${esc(title(c.intersection_name))} · ${esc(c.county)}</option>`).join('')}</select></label>
     <label>Site address or parcel<input type="text" id="sSite" value="${v('site', cand ? title(cand.intersection_name) : '')}"></label>
-    <label>RE manager<select id="sMgr">${[...MANAGERS, 'McDonald', 'Other'].map(m => `<option ${(s.manager || cand?.re_manager) === m ? 'selected' : ''}>${m}</option>`).join('')}</select></label>
+    <label>RE manager<select id="sMgr">${[...MANAGERS, 'Other'].map(m => `<option ${(s.manager || cand?.re_manager) === m ? 'selected' : ''}>${m}</option>`).join('')}</select></label>
     <label>Date sent<input type="date" id="sDate" value="${v('dateSent', new Date().toISOString().slice(0, 10))}"></label>
     <label>Status<select id="sStatus">${STATUSES.map(x => `<option ${s.status === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label>
     <label>Response date<input type="date" id="sResp" value="${v('responseDate')}"></label>
@@ -516,7 +516,7 @@ async function ask() {
   const out = $('#askOut'); out.textContent = 'Thinking…'; $('#askBtn').disabled = true;
   const tools = [{
     name: 'search_candidates',
-    description: 'Search scored 7-Eleven candidate intersections in the 8 pilot counties. Returns up to `limit` rows sorted by `sort` (descending).',
+    description: 'Search scored 7-Eleven candidate intersections in the 9 pilot counties (incl. Polk). Returns up to `limit` rows sorted by `sort` (descending).',
     inputSchema: { type: 'object', properties: {
       re_manager: { type: 'string', enum: MANAGERS }, county: { type: 'string', description: 'One of: ' + [...new Set(S.data.candidates.map(c => c.county))].join(', ') },
       tier: { type: 'string', enum: ['A', 'B', 'C'] }, market: { type: 'string', enum: ['Proven', 'White space'] },
@@ -560,7 +560,7 @@ window.addEventListener('hashchange', route);
   try { S.data = await loadData(); }
   catch { $('#metaLine').textContent = 'The data files could not be loaded.'; return; }
   const m = S.data.meta;
-  $('#metaLine').innerHTML = `Pilot: 8 counties · ${fmt(m.counts.raw_ok)} raw-land corners (${m.counts.tierA_raw} Tier A) · ${fmt(m.counts.candidates)} incl. redevelopment · Data built ${esc(m.built)}`;
+  $('#metaLine').innerHTML = `Pilot: 9 counties · ${fmt(m.counts.raw_ok)} raw-land corners (${m.counts.tierA_raw} Tier A) · ${fmt(m.counts.candidates)} incl. redevelopment · Data built ${esc(m.built)}`;
   const counties = [...new Set(S.data.candidates.map(c => c.county))].sort();
   $('#fCounty').insertAdjacentHTML('beforeend', counties.map(c => `<option>${esc(c)}</option>`).join(''));
   ['#fManager', '#fCounty', '#fTier', '#fMarket', '#fTop', '#fRedev'].forEach(s => $(s).addEventListener('change', applyFilters));

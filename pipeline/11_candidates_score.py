@@ -10,7 +10,7 @@ from shapely.geometry import Point
 
 MI = 1609.344
 PILOT = {'Duval': 'Bauer', 'St Johns': 'Bauer', 'Clay': 'Bauer', 'Volusia': 'Bauer', 'Brevard': 'Bauer',
-         'Pasco': 'Golden', 'Hillsborough': 'Golden', 'St Lucie': 'Antonacci'}
+         'Pasco': 'Golden', 'Hillsborough': 'Golden', 'St Lucie': 'Antonacci', 'Polk': 'Polk'}
 WEIGHTS = {'new_rooftops': 30, 'rooftop_pipeline': 10, 'new_grocery': 15, 'traffic': 15, 'gap_to_7eleven': 10,
            'retail_node': 10, 'signal': 10}
 KEEP_FC = {'04', '06', '07', '08', '14', '16', '17', '18'}   # arterials + collectors; no interstates/expressways/locals
@@ -204,6 +204,13 @@ def main(out, wb, result):
     q = fl.score.rank(pct=True)
     fl['tier'] = np.where(q >= 0.9, 'A', np.where(q >= 0.7, 'B', 'C'))
     fl['re_manager'] = fl.county.map(PILOT)
+    # Polk: the Feb 2026 team map gives McDonald 'Polk (east of SR-27)'; west of US-27 is not assigned on the map.
+    us27 = names[names.COUNTY.str.contains('Polk') & names.NAME.isin(['US-27', 'US 27'])].geometry.union_all()
+    def polk_mgr(g):
+        np_ = us27.interpolate(us27.project(g))
+        return 'McDonald' if g.x > np_.x else 'Polk west (TBD)'
+    m = fl.county == 'Polk'
+    fl.loc[m, 're_manager'] = [polk_mgr(g) for g in fl.loc[m].geometry]
     ll = gpd.GeoSeries(fl.geometry, crs=3086).to_crs(4326)
     fl['lat'], fl['lon'] = ll.y.round(6), ll.x.round(6)
     fl['google_maps'] = 'https://www.google.com/maps/search/?api=1&query=' + fl.lat.astype(str) + ',' + fl.lon.astype(str)
