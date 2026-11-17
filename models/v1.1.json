@@ -1,0 +1,98 @@
+{
+  "version": "v1.1",
+  "name": "v1.0 scoring + tighter land screen + trade-area output",
+  "status": "draft",
+  "approved_by": null,
+  "approved_on": null,
+  "published_on": null,
+  "artifact_version": null,
+  "pipeline_commit": null,
+  "notes": "Scoring weights unchanged from v1.0. Land screen and output thresholds are PROPOSED and need ECP confirmation.",
+  "pilot_counties": {
+    "Duval": "Bauer",
+    "St Johns": "Bauer",
+    "Clay": "Bauer",
+    "Volusia": "Bauer",
+    "Brevard": "Bauer",
+    "Pasco": "Golden",
+    "Hillsborough": "Golden",
+    "St Lucie": "Antonacci",
+    "Polk": "Polk"
+  },
+  "weights": {
+    "new_rooftops": 30,
+    "rooftop_pipeline": 5,
+    "new_grocery": 10,
+    "traffic": 25,
+    "gap_to_7eleven": 10,
+    "retail_node": 10,
+    "signal": 10
+  },
+  "mf_weight": 0.5,
+  "hard_filters": {
+    "min_miles_to_7eleven_fuel": 2.0
+  },
+  "raw_land": {
+    "min_acres": 1.3,
+    "touch_m": 50,
+    "exclude_owner_types": [
+      "government",
+      "school board",
+      "CDD",
+      "HOA/POA",
+      "utility",
+      "water management"
+    ],
+    "zone_m": 150,
+    "min_upland_acres": 1.3,
+    "wetland_screen": true,
+    "wetland_source": "USFWS National Wetlands Inventory (all mapped wetland and water types)",
+    "require_two_road_frontage": true,
+    "frontage_m": 45,
+    "same_road_angle_deg": 30,
+    "exclude_competitor_owned": true,
+    "exclude_owner_regex": "RACE ?TRAC|CIRCLE K|\\bWAWA\\b|MURPHY (OIL|USA)|SUNOCO|BUC-?EE|SPEEDWAY|7-?ELEVEN|SEVEN ELEVEN|7 ELEVEN|EXXON|MOBIL\\b|CUMBERLAND FARMS|GATE PETROLEUM|SHEETZ|QUIKTRIP|PILOT TRAVEL|LOVE'?S TRAVEL|KANGAROO|MAPCO|\\bRAIL(ROAD|WAY)\\b|\\bCSX\\b|FLORIDA EAST COAST|DUKE ENERGY|FLORIDA POWER|TAMPA ELECTRIC|\\bTECO\\b|SEMINOLE ELECTRIC",
+    "flag_owner_regex": {
+      "Walmart/Publix (check fuel deed restriction)": "WAL-?\\s?MART|WALMART|PUBLIX",
+      "Church": "CHURCH|IGLESIA|MINIST(RY|RIES|ERIO)|BAPTIST(?! HOSPITAL)|METHODIST|CATHOLIC|DIOCESE|PRESBYTER|LUTHERAN|ASSEMBLY OF GOD|CONGREGATION|MOSQUE|\\bTEMPLE\\b|FELLOWSHIP",
+      "Hospital/health system": "HOSPITAL|HEALTH ?SYSTEM|MEDICAL CENTER|ADVENTHEALTH|BAYCARE|ORLANDO HEALTH|HCA\\b",
+      "School/college": "SCHOOL|UNIVERSITY|COLLEGE|ACADEMY",
+      "Government-affiliated": "GOVERNMENTAL|GOVT|MUNICIPAL|PUBLIC FINANCE"
+    },
+    "competitor_regex": "RACE ?TRAC|CIRCLE K|\\bWAWA\\b|MURPHY (OIL|USA)|SUNOCO|BUC-?EE|SPEEDWAY|7-?ELEVEN|SEVEN ELEVEN|7 ELEVEN|EXXON|MOBIL\\b|CUMBERLAND FARMS|GATE PETROLEUM|SHEETZ|QUIKTRIP|PILOT TRAVEL|LOVE'?S TRAVEL|KANGAROO|MAPCO"
+  },
+  "tiers": {
+    "A_top_pct": 15,
+    "B_next_pct": 25,
+    "pool": "corners passing the v1.1 land screen"
+  },
+  "output": {
+    "mode": "trade_areas",
+    "trade_area_max_diameter_mi": 3.0,
+    "trade_area_rank_by": "best corner score",
+    "corners_per_trade_area": 3,
+    "top_n_trade_areas": 25,
+    "min_corner_spacing_mi": 0.5
+  },
+  "backtest": {
+    "note": "scoring unchanged from v1.0; land screen not backtestable (see v1.0 gaps)"
+  },
+  "snapshot": "models/snapshots/v1.1-draft/",
+  "scope_approved": "Ross, 2026-11-17: apply tighter land screen and two-step output from Luke's review; ignore competitor intercept, traffic floor, interchange/employment.",
+  "validation": {
+    "against": "Luke's Nov 17 review of v1.0 ranks 1-26",
+    "caught": [
+      "#8 Shindler & 103rd (wetlands; Luke Maybe, would pass)",
+      "#26 US-92 & County Line (RaceTrac-owned parcel; Luke Maybe)",
+      "#24 SR-60 & Rifle Range flagged: RaceTrac owns corner land (Luke No: new station)"
+    ],
+    "missed": [
+      "#22 Community & Discovery and #23 Henley & Sandridge: corners already taken/no options (tax roll as of Jan 1 2026)",
+      "#16 Alexander & Knights Griffin: wrong parcel"
+    ],
+    "false_removals": [
+      "#15 New Kings & 45th St W (Luke Yes): NWI shows forested wetland over the parcel; needs a look"
+    ],
+    "two_step": "Luke's same-trade-area groups now collapse: Babcock 5/10/32 -> area 5; Prospect 13/14 -> area 10; Becker 7/11 -> area 7; Brigantine/Community 6/22 -> area 6"
+  }
+}

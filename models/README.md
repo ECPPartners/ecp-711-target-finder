@@ -6,6 +6,7 @@ Every version of the scoring model is kept here so we can always revert. Confide
 |---|---|---|---|---|
 | v0.9 | 2026-11-03 | Tool Spec weights (rooftops 30, pipeline 10, grocery 15, traffic 15, gap 10, node 10, signal 10). 8 counties. No raw-land filter. | Ross, Nov 3 | Reference only, never published |
 | v1.0 | 2026-11-11 | Option B weights (traffic 25, grocery 10, pipeline 5; apartments count half), Polk added, raw-land corner filter (1.3+ ac within 50 m), Top 50 spaced 1 mi apart | Ross, Nov 11 | **Live.** Luke reviewed ranks 1–26 on Nov 17 |
+| v1.1 | 2026-11-17 | Same weights. Tighter land screen (upland acres near the corner after NWI wetlands, two-road frontage, competitor/rail/utility owners out, Walmart/Publix/church/hospital/school/government owners flagged). Two-step output: trade areas (corners within 3 mi) ranked by best corner, up to 3 corners each, top 25. | Scope: Ross, Nov 17; thresholds PROPOSED | **Draft**, not published |
 
 ## Rules
 - `models/<version>.json` holds everything that changes results: counties, weights, filters, land screen, tiers, output rules.
