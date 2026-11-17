@@ -1,26 +1,29 @@
 """Step 2: candidate intersections, factor scoring, hard filters, tiers, and backtest.
 Usage: python3 -I 11_candidates_score.py <out_dir> <source_workbook.xlsx> <result.xlsx>
 All distances computed in EPSG:3086 (Florida GDL Albers, meters).
-Weights and rules: Tool Spec v1.0 (approved by Ross, Nov 3, 2026).
+Weights and rules come from the model registry (models/<version>.json; env MODEL picks a version, default models/CURRENT).
 """
 import sys, os, glob, re, json
 import numpy as np, pandas as pd, geopandas as gpd
 from scipy.spatial import cKDTree
 from shapely.geometry import Point
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from model import load_model
 
 MI = 1609.344
-PILOT = {'Duval': 'Bauer', 'St Johns': 'Bauer', 'Clay': 'Bauer', 'Volusia': 'Bauer', 'Brevard': 'Bauer',
-         'Pasco': 'Golden', 'Hillsborough': 'Golden', 'St Lucie': 'Antonacci', 'Polk': 'Polk'}
-WEIGHTS = {'new_rooftops': 30, 'rooftop_pipeline': 10, 'new_grocery': 15, 'traffic': 15, 'gap_to_7eleven': 10,
-           'retail_node': 10, 'signal': 10}
+MODEL = load_model()
+PILOT = MODEL['pilot_counties']
+WEIGHTS = MODEL['weights']
 KEEP_FC = {'04', '06', '07', '08', '14', '16', '17', '18'}   # arterials + collectors; no interstates/expressways/locals
 RESTRICTIVE_MEDIAN = {'02', '03', '06', '08', '13', '17', '22', '31', '32', '34'}
 GROCERS = {'Publix', 'Aldi', 'Winn-Dixie', 'Whole Foods', "Trader Joe's", 'Sprouts'}
 ANCHORS = {'Walmart', 'Publix', 'Target', 'Home Depot', "Lowe's", 'Costco', "Sam's Club", 'Aldi', 'Winn-Dixie', 'Tractor Supply'}
 NATIONALS = {"McDonald's", 'Starbucks', 'Dollar General'}
+# SCORE_OPTS is for one-off experiments only; anything published must be saved as a new models/<version>.json
 OPTS = json.loads(os.environ.get('SCORE_OPTS', '{}'))   # e.g. {"weights": {...}, "mf_weight": 0.5}
 WEIGHTS = OPTS.get('weights', WEIGHTS)
-MF_WEIGHT = OPTS.get('mf_weight', 1.0)   # weight per multifamily/condo unit in the rooftop count
+MF_WEIGHT = OPTS.get('mf_weight', MODEL['mf_weight'])
+MIN_MI = MODEL['hard_filters']['min_miles_to_7eleven_fuel']
 TODAY = pd.Timestamp.today().strftime('%Y-%m-%d')
 
 def xy(g): return np.c_[g.geometry.x.values, g.geometry.y.values]
@@ -199,7 +202,7 @@ def main(out, wb, result):
     lrank = np.searchsorted(allscores, ltotal.values, side='right') / len(allscores)
 
     # hard filter + tiers
-    cand['passes_2mi_filter'] = cand.dist_to_7eleven_mi >= 2
+    cand['passes_2mi_filter'] = cand.dist_to_7eleven_mi >= MIN_MI
     fl = cand[cand.passes_2mi_filter].copy()
     q = fl.score.rank(pct=True)
     fl['tier'] = np.where(q >= 0.9, 'A', np.where(q >= 0.7, 'B', 'C'))
@@ -256,7 +259,7 @@ def main(out, wb, result):
     method = pd.DataFrame([
         ['Candidates', f'Intersections of FDOT arterial/collector roads (functional class {sorted(KEEP_FC)}), clustered within 150 m; interstates, expressways and local streets excluded. {len(cand):,} in pilot counties.'],
         ['Hard filters', f'2+ miles from any 7-Eleven/Speedway fuel store (FDEP + 7-Eleven API; non-fuel stores do not trigger it). {int(cand.passes_2mi_filter.sum()):,} pass. Curb cut on each road is implied by intersection; Luke verifies.'],
-        ['Weights', ', '.join(f'{k} {w}' for k, w in WEIGHTS.items()) + ' (Tool Spec, approved Nov 3).'],
+        ['Weights', ', '.join(f'{k} {w}' for k, w in WEIGHTS.items()) + f" (model {MODEL['version']}, approved {MODEL['approved_on']})."],
         ['New rooftops', 'Residential units with DOR actual year built 2023-2025 within 3 miles; scored as percentile among pilot intersections.'],
         ['Rooftop pipeline', 'Vacant residential parcels under 0.5 ac (platted lots) within 3 miles; percentile. INFERENCE: proxy for approved subdivisions.'],
         ['New grocery', 'Grocers (Publix, Aldi, Winn-Dixie, Whole Foods, Trader Joe\'s, Sprouts) on parcels built 2023+ within 3 miles; 0, 1, 2+. INFERENCE from parcel year built; "coming soon" stores not yet included.'],

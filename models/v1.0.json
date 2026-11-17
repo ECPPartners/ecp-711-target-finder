@@ -1,0 +1,33 @@
+{
+  "version": "v1.0",
+  "name": "Option B + raw-land corner filter",
+  "status": "superseded-when-v1.1-published",
+  "approved_by": "Ross Kirchman",
+  "approved_on": "2026-11-11",
+  "published_on": "2026-11-11",
+  "artifact_version": "1794424326-c84f",
+  "notes": "Weights approved Nov 3 (Tool Spec) then revised to Option B after the backtest; raw-land corner filter approved Nov 11. This is the model behind the Top 50 that Luke reviewed Nov 17.",
+  "pilot_counties": {"Duval": "Bauer", "St Johns": "Bauer", "Clay": "Bauer", "Volusia": "Bauer", "Brevard": "Bauer",
+                     "Pasco": "Golden", "Hillsborough": "Golden", "St Lucie": "Antonacci", "Polk": "Polk"},
+  "weights": {"new_rooftops": 30, "rooftop_pipeline": 5, "new_grocery": 10, "traffic": 25,
+              "gap_to_7eleven": 10, "retail_node": 10, "signal": 10},
+  "mf_weight": 0.5,
+  "hard_filters": {"min_miles_to_7eleven_fuel": 2.0},
+  "raw_land": {
+    "min_acres": 1.3,
+    "touch_m": 50,
+    "exclude_owner_types": ["government", "school board", "CDD", "HOA/POA", "utility", "water management"],
+    "exclude_competitor_owned": false,
+    "flag_owners": [],
+    "wetland_screen": false,
+    "require_two_road_frontage": false
+  },
+  "tiers": {"A_top_pct": 15, "B_next_pct": 25, "pool": "raw-land corners"},
+  "output": {
+    "mode": "corners",
+    "top_n": 50,
+    "min_spacing_mi": 1.0
+  },
+  "backtest": {"recent_builds_median_pct": 76, "pct_in_top_25": 54, "legacy_median_pct": 62},
+  "snapshot": "models/snapshots/v1.0/"
+}

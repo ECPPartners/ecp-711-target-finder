@@ -1,0 +1,20 @@
+{
+  "version": "v0.9",
+  "name": "Tool Spec weights as approved Nov 3 (reference only)",
+  "status": "superseded",
+  "approved_by": "Ross Kirchman",
+  "approved_on": "2026-11-03",
+  "published_on": null,
+  "notes": "Never published as the live list; replaced by Option B after the backtest (recent builds median percentile 73 vs 76). Recorded so it can be rerun. No raw-land filter.",
+  "pilot_counties": {"Duval": "Bauer", "St Johns": "Bauer", "Clay": "Bauer", "Volusia": "Bauer", "Brevard": "Bauer",
+                     "Pasco": "Golden", "Hillsborough": "Golden", "St Lucie": "Antonacci"},
+  "weights": {"new_rooftops": 30, "rooftop_pipeline": 10, "new_grocery": 15, "traffic": 15,
+              "gap_to_7eleven": 10, "retail_node": 10, "signal": 10},
+  "mf_weight": 1.0,
+  "hard_filters": {"min_miles_to_7eleven_fuel": 2.0},
+  "raw_land": null,
+  "tiers": {"A_top_pct": 10, "B_next_pct": 20, "pool": "all candidates"},
+  "output": {"mode": "corners", "top_n": null, "min_spacing_mi": null},
+  "backtest": {"recent_builds_median_pct": 73, "pct_in_top_25": 37, "legacy_median_pct": 56},
+  "snapshot": null
+}
