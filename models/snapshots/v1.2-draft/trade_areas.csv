@@ -1,0 +1,143 @@
+trade_area_rank,county,re_manager,market_type,best_corner,best_score,tier,corners_passing,corners_shown,span_mi,new_homes_3mi_max,aadt_max,nearest_7eleven_mi,center_lat,center_lon,redev_corner,redev_score,redev_mi_from_best,redev_why_not_listed
+1,Polk,McDonald,Proven (7-Eleven built here since 2018),BATES RD & US-17/92,74.6,A,1,1,0.0,4259.0,36800,2.0,28.13584,-81.61311,,,,
+2,Pasco,Golden,Proven (7-Eleven built here since 2018),SR-54 & CURLEY RD,71.2,A,2,2,1.1,4037.0,75200,2.2,28.23623,-82.3046,,,,
+3,Duval,Bauer,White space,SHINDLER DR & 103RD ST,63.4,A,1,1,0.0,1569.0,54400,2.6,30.24759,-81.79807,,,,
+4,Duval,Bauer,White space,DUNN AVE & NEW KINGS RD,62.2,A,3,1,2.3,1496.5,48000,2.5,30.44664666666667,-81.76904666666665,,,,
+5,Duval,Bauer,White space,CRAVEN RD & BAYMEADOWS RD,62.1,A,2,2,2.3,1814.0,37900,2.3,30.20607,-81.591125,BAYMEADOWS RD & PHILIPS HWY,76.3,0.9,no raw parcel at corner
+6,Duval,Bauer,White space,CHAFFEE RD S & NORMANDY BLVD,61.7,A,1,1,0.0,1221.0,37000,5.0,30.26723,-81.8487,POW-MIA MEMORIAL PKY & CHAFFEE RD,44.8,1.4,no raw parcel at corner
+7,Pasco,Golden,Proven (7-Eleven built here since 2018),WILDERNESS LAKE BLVD & LAND O LAKES BLVD,60.6,A,4,3,1.7,1867.5,50200,2.1,28.2534075,-82.4606825,,,,
+8,St Lucie,Antonacci,Proven (7-Eleven built here since 2018),SW BRIGANTINE PL & SW GATLIN BLVD,59.8,A,3,2,1.9,4872.5,62300,2.3,27.261076666666668,-80.41368,SW SAVONA BLVD & SW GATLIN BLVD,60.4,1.1,no raw parcel at corner
+9,Pasco,Golden,Proven (7-Eleven built here since 2018),PROSPECT RD & CLINTON AVE,59.6,A,3,2,1.9,3160.5,57000,3.1,28.326016666666664,-82.23994,CAMPUS ST & CAMPUS DR & SR-52,38.8,1.3,no raw parcel at corner
+10,Duval,Bauer,White space,PRITCHARD RD W & OLD KINGS RD & SOUTEL DR,57.0,A,2,2,1.9,985.0,67000,3.0,30.370199999999997,-81.73431500000001,NEW KINGS RD & SOUTEL DR,65.6,1.2,no raw parcel at corner
+11,Volusia,Bauer,Proven (7-Eleven built here since 2018),SR-472 & KENTUCKY AVE,56.7,A,3,2,2.5,884.5,46700,2.0,28.96439666666667,-81.28475333333334,,,,
+12,St Lucie,Antonacci,White space,BECKER RD & SW VILLAGE PKWY,56.3,A,3,3,2.5,2352.5,30000,5.5,27.214206666666666,-80.38968333333334,,,,
+13,Volusia,Bauer,Proven (7-Eleven built here since 2018),S CLARA AVE & SR-15A,54.7,A,2,2,0.6,1389.5,30900,2.3,28.998965,-81.30167499999999,ORANGE CAMP RD & S WOODLAND BLVD,73.3,1.1,no raw parcel at corner
+14,Brevard,Bauer,White space,BABCOCK ST & COGAN DR,53.7,A,3,3,2.9,2351.0,14800,3.1,27.895593333333334,-80.62270666666666,,,,
+15,Polk,McDonald,Proven (7-Eleven built here since 2018),US-17/92 & ERNIE CALDWELL BLVD,52.6,A,2,2,1.3,3017.0,41000,2.2,28.205935,-81.589395,,,,
+16,Hillsborough,Golden,White space,N ALEXANDER ST & PAUL BUCHMAN HWY & W KNIGHTS GRIFFIN RD,52.3,A,2,2,2.0,1194.0,30000,3.4,28.06201,-82.13677000000001,N ALEXANDER ST & PAUL S BUCHMAN HWY,36.5,0.9,only 0.15 ac of the parcel near the corner (need 1.0)
+17,Polk,Polk west (TBD),Proven (7-Eleven built here since 2018),SR-60 & RIFLE RANGE RD,52.2,A,2,2,2.2,604.0,44200,4.6,27.912695,-81.74383,,,,
+18,Volusia,Bauer,Proven (7-Eleven built here since 2018),C R BEALL BLVD & DIRKSEN DR,51.4,A,3,2,0.7,744.0,44300,2.2,28.862556666666666,-81.32054000000001,,,,
+19,Pasco,Golden,White space,SILVER PALM BLVD & SR-52,50.9,A,2,2,2.1,1713.0,37000,2.7,28.345795000000003,-82.561065,,,,
+20,Hillsborough,Golden,Proven (7-Eleven built here since 2018),S US-41 & GIBSONSTON DR,50.5,A,2,2,1.0,530.0,54400,2.9,27.84243,-82.381655,S US-41 & RIVERVIEW DR,48.6,1.0,no raw parcel at corner
+21,Hillsborough,Golden,Proven (7-Eleven built here since 2018),CROSS CREEK BLVD & MORRIS BRIDGE RD,49.4,A,1,1,0.0,524.0,49500,4.2,28.14396,-82.28191,PICTORIAL PARK DR & MORRIS BRIDGE RD,42.1,0.6,no raw parcel at corner
+22,Pasco,Golden,White space,LITTLE RD & US-19,49.1,A,2,1,0.4,80.0,88500,2.1,28.401915,-82.65765,,,,
+23,Polk,Polk west (TBD),Proven (7-Eleven built here since 2018),OLD BARTOW/EAGLE LK & SPIRIT LAKE RD,48.4,A,1,1,0.0,1432.0,30400,2.3,27.9675,-81.78413,EAST AVE & CR-559/BOMBER RD,60.0,0.7,no raw parcel at corner
+24,St Johns,Bauer,White space,SR 13 & CR-16A,48.4,A,1,1,0.0,1978.5,18700,3.2,30.00838,-81.61302,,,,
+25,Clay,Bauer,White space,RUSSELL RD & CR-739B/SANDRIDGE RD,47.7,A,1,1,0.0,2203.0,20200,3.4,30.05616,-81.75041,,,,
+26,Volusia,Bauer,Proven (7-Eleven built here since 2018),WOLF PACK RUN & HOWLAND BLVD,46.4,A,4,3,3.0,1143.5,29750,2.8,28.957594999999998,-81.23817249999999,PROVIDENCE BLVD & HOWLAND BLVD,47.3,1.5,no raw parcel at corner
+27,Clay,Bauer,White space,US-301 & CR-218,45.1,B,2,1,1.6,22.0,50500,9.8,30.148719999999997,-82.020095,,,,
+28,Pasco,Golden,Proven (7-Eleven built here since 2018),S BRANCH BLVD & SR-54,45.0,B,3,1,1.9,590.5,57000,2.4,28.176913333333335,-82.55405666666667,BEXLEY VILLAGE DR & SR-54,46.5,0.8,no raw parcel at corner
+29,St Johns,Bauer,Proven (7-Eleven built here since 2018),CROSSTOWN DR & VALLEY RIDGE BLVD,44.8,B,2,1,0.4,2042.0,18300,2.8,30.10498,-81.440175,VALLEY RIDGE BLVD & NOCATEE PKWY,51.0,0.5,no raw parcel at corner
+30,Hillsborough,Golden,Proven (7-Eleven built here since 2018),SR-674 & CR-579,44.4,B,2,1,1.4,1506.0,22950,4.5,27.712365,-82.28472,,,,
+31,Clay,Bauer,White space,HENLEY RD & SANDRIDGE RD,44.3,B,2,2,1.1,1569.0,15000,4.0,30.037999999999997,-81.80942,,,,
+32,Polk,McDonald,Proven (7-Eleven built here since 2018),MOUNTAIN LK CUTOF RD & SCENIC HWY,43.8,B,1,1,0.0,595.5,28300,3.2,27.92448,-81.59535,MOUNTAIN LK CUTOF RD & US 27,55.2,0.7,no raw parcel at corner
+33,Hillsborough,Golden,Proven (7-Eleven built here since 2018),GUNN HWY & VAN DYKE RD,42.3,B,4,2,2.1,189.0,40000,2.1,28.1197125,-82.56423249999999,,,,
+34,Duval,Bauer,White space,STARRATT RD & AIRPORT CENTER DR E,41.4,B,2,1,0.2,1626.0,15300,5.9,30.474135,-81.6088,MAIN ST N & MAX LEGGETT PKWY & DUVAL STATION RD,55.7,1.4,no raw parcel at corner
+35,Volusia,Bauer,Proven (7-Eleven built here since 2018),PLANTATION OAKS BLVD & US-1,41.3,B,2,1,0.5,708.0,31500,4.0,29.3305,-81.12362,,,,
+36,St Lucie,Antonacci,Proven (7-Eleven built here since 2018),CR-614/INDRIO RD & FEDERAL HWY/US-1,41.1,B,2,1,0.2,361.5,30600,2.7,27.520699999999998,-80.35432,,,,
+37,Polk,Polk west (TBD),Proven (7-Eleven built here since 2018),WARING RD & W PIPKIN RD,41.1,B,2,1,0.2,911.0,20100,2.0,27.97478,-81.99575,,,,
+38,Polk,McDonald,Proven (7-Eleven built here since 2018),KOKOMO RD & 10TH ST S,40.7,B,2,2,1.0,1650.0,21000,2.8,28.047995,-81.620175,KOKOMO RD & US 27,54.7,0.9,no raw parcel at corner
+39,St Johns,Bauer,White space,LEWIS SPEEDWAY RD & WOODLAWN RD,39.9,B,1,1,0.0,1075.5,16300,5.7,29.93126,-81.34391,KENTON MORRISON RD & SR-16,66.7,1.5,no raw parcel at corner
+40,Polk,Polk west (TBD),Proven (7-Eleven built here since 2018),DENTON AVE & BERKLEY RD/SR-559,39.9,B,1,1,0.0,800.0,19000,2.5,28.08439,-81.81773,OLD DIXIE HWY & BERKLEY RD/SR-559,48.8,0.8,no raw parcel at corner
+41,Pasco,Golden,Proven (7-Eleven built here since 2018),OLD PASCO RD & SR-52,39.5,B,1,1,0.0,816.5,34900,2.6,28.32453,-82.33688,,,,
+42,Hillsborough,Golden,Proven (7-Eleven built here since 2018),CHARLIE TAYLOR RD & E KNIGHTS GRIFFIN RD,39.0,B,1,1,0.0,1764.0,10650,4.8,28.08037,-82.07351,N WILDER RD & E KNIGHTS GRIFFIN RD,39.2,1.4,no raw parcel at corner
+43,St Lucie,Antonacci,Proven (7-Eleven built here since 2018),COMMERCE CENTRE DR & GLADES CUT OFF RD,38.6,B,1,1,0.0,1516.0,13900,2.7,27.34258,-80.42844,,,,
+44,Polk,Polk west (TBD),Proven (7-Eleven built here since 2018),US-27 & CR-640,38.5,B,2,2,2.0,445.5,32402,2.2,27.85743,-81.583635,,,,
+45,Polk,Polk west (TBD),Proven (7-Eleven built here since 2018),SHEPHERD RD & COUNTY LINE RD,38.3,B,4,2,1.1,501.0,36600,3.8,27.9448875,-82.0538,,,,
+46,Duval,Bauer,White space,NORMANDY BLVD & US-301,38.1,B,2,1,1.5,18.0,31900,9.7,30.202235,-82.00314,MAXVILLE MCCLENNY RD & US-301,25.2,0.1,no raw parcel at corner
+47,Pasco,Golden,White space,FRAZEE HILL RD & BLANTON RD,38.0,B,4,3,2.4,762.0,30400,3.1,28.3778575,-82.21945249999999,RAMSEY ROAD & BLANTON RD,29.2,1.3,owned by TAMPA ELECTRIC COMPANY
+48,Polk,Polk west (TBD),Proven (7-Eleven built here since 2018),CLARK RD & US-92,37.4,B,4,3,1.4,780.5,20700,2.2,28.032395,-82.0323175,US-92 & COUNTY LINE RD,51.9,1.0,owned by RACETRAC PETROLEUM INC
+49,Polk,Polk west (TBD),Proven (7-Eleven built here since 2018),WEST PIPKIN RD & COUNTY LINE RD,37.3,B,3,3,1.1,514.0,33900,2.2,27.975016666666665,-82.05128,,,,
+50,Hillsborough,Golden,Proven (7-Eleven built here since 2018),PATTERSON RD & TARPON SPRINGS RD,37.1,B,1,1,0.0,81.0,45800,3.1,28.14033,-82.63671,,,,
+51,Hillsborough,Golden,Proven (7-Eleven built here since 2018),BALM RIVERVIEW RD & CR 672,37.1,B,3,3,1.8,820.0,25300,2.3,27.765443333333334,-82.25724333333334,,,,
+52,Pasco,Golden,Proven (7-Eleven built here since 2018),E COUNTY LINE RD & CYPRESS CREEK RD,37.1,B,2,2,2.3,853.0,41000,2.3,28.18793,-82.39993999999999,SR-54 & WESLEY CHAPEL BLVD,53.2,1.4,no raw parcel at corner
+53,St Johns,Bauer,White space,SR-207 & SR-206,36.8,B,3,1,2.9,26.0,29200,9.8,29.718443333333337,-81.48280333333334,,,,
+54,Pasco,Golden,Proven (7-Eleven built here since 2018),CURLEY RD & DARBY RD,36.2,B,4,3,1.7,1304.5,24200,2.0,28.365054999999998,-82.28169,,,,
+55,Polk,Polk west (TBD),White space,SCENIC HWY & US-27,36.1,B,1,1,0.0,32.0,28300,14.9,27.67796,-81.55363,,,,
+56,St Lucie,Antonacci,Proven (7-Eleven built here since 2018),KINGS HWY & ST LUCIE BLVD,35.4,B,3,2,2.0,339.0,23600,2.5,27.484079999999995,-80.38244666666667,,,,
+57,Hillsborough,Golden,White space,N WILDER RD & N FRONTAGE RD & S FRONTAGE RD,35.3,B,4,3,2.6,1975.0,14750,3.4,28.03633,-82.09489500000001,US-92 E & S PARK RD,63.5,1.3,no raw parcel at corner
+58,Brevard,Bauer,White space,S PARK AVE & SOUTH ST,35.2,B,2,2,0.8,327.0,22800,3.7,28.579925000000003,-80.84705,BARNA AVE & KNOX MCRAE DR,26.8,1.5,no raw parcel at corner
+59,Pasco,Golden,White space,SR-52 & CR-583/EHREN CUTOFF,35.1,B,1,1,0.0,454.5,30300,5.0,28.32316,-82.41647,,,,
+60,Volusia,Bauer,White space,NEW SMYRNA BLVD & SR-415,35.0,B,2,2,2.3,455.0,30800,4.1,28.863545000000002,-81.16397,RAILROAD AVE & ENTERPRISE OSTEEN RD & SR-415,34.8,0.1,no raw parcel at corner
+61,Clay,Bauer,White space,COLLEGE DR/CR-224 & PEORIA RD,34.5,B,1,1,0.0,464.0,28600,2.1,30.13112,-81.77476,COLLEGE DR/CR-224 & BLANDING BLVD,61.1,0.5,no raw parcel at corner
+62,Polk,McDonald,Proven (7-Eleven built here since 2018),LK HATCHINEHA RD & WATKINS RD,33.6,B,2,1,0.4,1040.0,12200,3.1,28.036095,-81.53133,,,,
+63,Volusia,Bauer,White space,GLENWOOD RD & N SPRING GOLDEN AVE,33.6,B,3,2,2.6,729.0,20150,2.0,29.062326666666667,-81.34304333333334,US-17 & N SPRING GARDEN AVE,46.4,1.1,no raw parcel at corner
+64,Polk,Polk west (TBD),Proven (7-Eleven built here since 2018),LAKE ALFRED RD & BOLENDER RD,33.2,B,1,1,0.0,1380.0,10300,2.1,28.08745,-81.76465,,,,
+65,St Johns,Bauer,Proven (7-Eleven built here since 2018),LONG LEAF PINE PKWY & VETERANS PKWY,32.6,C,1,1,0.0,674.0,22800,2.1,30.08451,-81.56785,,,,
+66,Hillsborough,Golden,White space,SR-674 & KICKLITER/PC-CR-39,32.4,C,1,1,0.0,1.0,24131,10.9,27.70447,-82.14613,,,,
+67,Volusia,Bauer,Proven (7-Eleven built here since 2018),AIRPORT RD & AIRPORT BLVD & PIONEER TRL,31.3,C,4,3,2.9,794.0,15600,2.7,29.04859,-81.0274675,,,,
+68,Clay,Bauer,White space,JC PENNEY BLVD & CR-218,30.8,C,1,1,0.0,34.0,20300,6.6,29.98247,-81.80717,,,,
+69,Polk,Polk west (TBD),White space,US-98 & SR-471,30.7,C,1,1,0.0,7.0,21300,7.5,28.248,-82.05561,,,,
+70,Hillsborough,Golden,White space,US-301 & STACY RD,30.4,C,5,3,2.5,458.0,26100,3.3,28.064528000000003,-82.29622200000001,US-301 & MANGO RD,32.1,1.3,no raw parcel at corner
+71,Duval,Bauer,White space,MAIN ST N & YELLOW BLUFF RD,30.3,C,1,1,0.0,499.5,22900,7.0,30.54693,-81.62141,,,,
+72,Hillsborough,Golden,Proven (7-Eleven built here since 2018),LIVINGSTON AVE & VANDERVORT RD,30.2,C,1,1,0.0,919.5,15600,2.2,28.10973,-82.43073,,,,
+73,Hillsborough,Golden,White space,COMMERCE ST & PICNIC ISLAND BLVD,30.1,C,1,1,0.0,1151.5,11400,2.5,27.86093,-82.5429,,,,
+74,St Lucie,Antonacci,White space,ELEVEN MILE RD & MIDWAY RD,29.9,C,3,1,2.0,873.0,12200,4.7,27.39314,-80.44278666666666,MIDWAY RD & MCCARTY RD,27.2,0.5,no raw parcel at corner
+75,Pasco,Golden,White space,PEACE BLVD & SHADY HILLS RD,29.5,C,1,1,0.0,309.0,24900,2.9,28.39192,-82.55121,SOFTWIND LN & SHADY HILLS RD,40.3,1.2,no raw parcel at corner
+76,Brevard,Bauer,White space,DELEON AVE & SOUTH ST,29.0,C,4,3,1.8,426.0,17900,3.8,28.596197500000002,-80.8243325,SR 406/GARDEN ST & SR-5/US-1 & HOPKINS AVE,39.9,0.7,no raw parcel at corner
+77,St Lucie,Antonacci,Proven (7-Eleven built here since 2018),KOBLEGARD RD & INDRIO RD,28.7,C,2,2,3.0,589.0,26100,2.4,27.538755000000002,-80.42919,,,,
+78,Clay,Bauer,White space,SR-16 & SR-21,28.5,C,1,1,0.0,15.0,18300,7.3,29.97841,-81.89779,,,,
+79,Hillsborough,Golden,White space,E WHEELER RD & N VALRICO RD,28.2,C,2,2,2.1,206.0,26400,2.1,27.970675,-82.236265,DR MLK JR BLVD & N VALRICO RD,38.9,0.9,no raw parcel at corner
+80,St Johns,Bauer,White space,GREEN BRIAR RD & SR 13,28.1,C,1,1,0.0,1079.5,14000,2.7,30.0645,-81.66173,,,,
+81,Duval,Bauer,White space,LEM TURNER RD & BRADDOCK RD,27.0,C,1,1,0.0,722.0,15600,3.7,30.49378,-81.73927,,,,
+82,Volusia,Bauer,Proven (7-Eleven built here since 2018),OLD MISSION RD & W PARK AVE,26.8,C,3,2,0.9,683.5,13000,3.1,28.981363333333334,-80.93830666666666,,,,
+83,Volusia,Bauer,White space,SPRING GARDEN RANCH & US-17,26.4,C,1,1,0.0,51.0,14350,5.6,29.13518,-81.35266,US-17 & REYNOLDS RD,24.4,1.1,no raw parcel at corner
+84,Polk,Polk west (TBD),White space,OLD GRADE RD & DEEN STILL RD,26.3,C,1,1,0.0,5.0,22300,6.3,28.25904,-81.7641,,,,
+85,Brevard,Bauer,White space,N CARPENTER RD & SR-46,26.2,C,1,1,0.0,267.0,8900,10.1,28.66621,-80.87278,HOLDER RD & SR-46,30.7,0.4,no raw parcel at corner
+86,St Lucie,Antonacci,White space,SE MORNINGSIDE BLVD & SE WESTMORELAND BLVD,25.8,C,1,1,0.0,586.5,13400,2.1,27.25975,-80.30941,SE WESTMORELAND BLVD & SW PORT ST LUCIE BLV,59.5,1.0,no raw parcel at corner
+87,Pasco,Golden,Proven (7-Eleven built here since 2018),WILDS RD & OLD LAKELAND HWY,25.8,C,2,2,1.4,589.0,16700,2.0,28.308304999999997,-82.15211500000001,,,,
+88,Brevard,Bauer,White space,CAMP RD & GRISSOM PKWY,25.1,C,1,1,0.0,416.0,13500,3.6,28.44604,-80.78984,PORT ST JOHN PKWY & GRISSOM PKWY,33.7,1.0,no raw parcel at corner
+89,Volusia,Bauer,Proven (7-Eleven built here since 2018),OLD DAYTONA RD & BRUNSWICK RD,25.0,C,1,1,0.0,702.5,7300,2.8,29.0575,-81.29188,N AMELIA AVE & INTL SPEEDWAY BLVD,56.9,0.5,no raw parcel at corner
+90,Polk,Polk west (TBD),White space,SR 37 & CR 640,24.7,C,2,1,0.3,14.0,17700,3.1,27.85084,-81.97529,,,,
+91,Duval,Bauer,White space,BROWARD RD & CLARK RD,24.5,C,2,2,1.5,512.5,13200,2.0,30.416425,-81.64982499999999,BISCAYNE BLVD & DUNN AVE,56.9,1.2,no raw parcel at corner
+92,Pasco,Golden,Proven (7-Eleven built here since 2018),OLD LAKELAND HWY & CR 54,24.2,C,2,2,1.4,417.0,22400,2.3,28.262349999999998,-82.1465,,,,
+93,Brevard,Bauer,White space,N CARPENTER RD & CR-406/GARDEN ST,24.0,C,4,3,2.2,387.0,10800,6.5,28.631529999999998,-80.84765,SINGLETON AVE & SR 406/GARDEN ST,46.3,1.3,no raw parcel at corner
+94,St Lucie,Antonacci,White space,SE WALTON RD & S INDIAN RIVER DR,23.9,C,1,1,0.0,290.5,17300,2.7,27.29867,-80.25397,GREEN RIVER PKWY & SE MELALEUCA BLVD,19.9,0.9,no raw parcel at corner
+95,Hillsborough,Golden,Proven (7-Eleven built here since 2018),WILLIAMS RD & E SLIGH AVE,23.6,C,1,1,0.0,742.0,10100,2.0,28.00698,-82.31799,,,,
+96,Brevard,Bauer,White space,SR-A1A & N ORLANDO AVE,23.6,C,1,1,0.0,38.5,31800,2.3,28.28398,-80.60767,,,,
+97,Clay,Bauer,White space,SR-16 & CR-315,23.5,C,1,1,0.0,282.0,20000,3.1,29.98367,-81.73116,,,,
+98,Pasco,Golden,White space,HUDSON AVE & HICKS RD,22.6,C,2,2,1.5,466.0,14700,2.0,28.36076,-82.63745,,,,
+99,Duval,Bauer,White space,BEAVER ST W & OTIS RD,22.5,C,1,1,0.0,625.0,12000,6.7,30.30945,-81.89463,,,,
+100,Brevard,Bauer,White space,VALKARIA RD & US-1/SR-5/DIXIE HWY,22.2,C,1,1,0.0,79.0,21644,5.2,27.96383,-80.54162,,,,
+101,Polk,Polk west (TBD),Proven (7-Eleven built here since 2018),OLD POLK CITY RD & SR 33,21.7,C,2,1,0.3,171.0,22800,3.0,28.159464999999997,-81.859855,,,,
+102,Pasco,Golden,Proven (7-Eleven built here since 2018),CHANCEY RD & CORREIA,21.5,C,1,1,0.0,471.0,11700,2.4,28.21384,-82.14619,,,,
+103,Volusia,Bauer,Proven (7-Eleven built here since 2018),TOWN WEST BLVD & TOMOKA FARMS RD,21.2,C,2,2,1.9,280.5,18000,2.4,29.097,-81.06919500000001,,,,
+104,Brevard,Bauer,Proven (7-Eleven built here since 2018),S COURTENAY PKWY & CR-3/S TROPICAL TRL,20.5,C,1,1,0.0,40.0,18100,3.1,28.28874,-80.67139,,,,
+105,Duval,Bauer,White space,BEAVER ST W & BRANDY BRANCH RD,20.2,C,2,2,2.5,41.0,10200,11.0,30.302805,-81.98744500000001,,,,
+106,St Lucie,Antonacci,Proven (7-Eleven built here since 2018),BINNEY DR & S OCEAN DR,20.2,C,2,2,2.6,88.0,19600,2.1,27.471185,-80.31264,BINNEY DR & SEAWAY DR,36.3,0.7,no raw parcel at corner
+107,Pasco,Golden,White space,BLANTON RD & LAKE IOLA RD,19.9,C,3,1,2.2,16.0,14500,5.6,28.41031,-82.3162,,,,
+108,Hillsborough,Golden,White space,S WOODROW WILSON ST & W BAKER ST,19.7,C,1,1,0.0,266.0,15600,2.5,28.01938,-82.14622,E BAKER ST & N WHEELER ST,41.7,1.3,no raw parcel at corner
+109,Polk,Polk west (TBD),White space,COMMONWEALTH AVE N & DEEN STILL RD,19.1,C,1,1,0.0,9.0,19300,7.9,28.25839,-81.82442,,,,
+110,Duval,Bauer,White space,COMMONWEALTH AVE & JONES RD,18.3,C,1,1,0.0,504.0,8000,2.1,30.34607,-81.80685,,,,
+111,St Johns,Bauer,White space,SR-207 & CR 305,18.3,C,1,1,0.0,19.0,17600,5.8,29.78293,-81.42588,,,,
+112,Duval,Bauer,White space,ALTA DR & FAYE RD,18.1,C,1,1,0.0,296.0,7100,5.9,30.43714,-81.5796,NEW BERLIN RD S & E NEW BERLIN RD,18.4,1.4,no raw parcel at corner
+113,Polk,McDonald,White space,SR 60 & CR 630,18.0,C,1,1,0.0,63.0,16200,15.8,27.80616,-81.31588,,,,
+114,Pasco,Golden,White space,DENTON AVE & KITTEN TRL,17.9,C,1,1,0.0,308.0,9200,3.1,28.39007,-82.60265,,,,
+115,Brevard,Bauer,Proven (7-Eleven built here since 2018),COREY RD & MALABAR RD,17.5,C,1,1,0.0,216.5,17300,2.6,27.99805,-80.58948,COREY RD & HALL RD,11.6,0.5,no raw parcel at corner
+116,Brevard,Bauer,White space,MAIN ST & US-1/SR-5/DIXIE HWY,17.2,C,1,1,0.0,99.0,17650,3.6,27.85676,-80.49171,,,,
+117,Pasco,Golden,Proven (7-Eleven built here since 2018),BELLAMY BROTHERS RD & DARBY RD,17.2,C,2,2,1.0,316.0,8600,4.6,28.368175,-82.35817,,,,
+118,Volusia,Bauer,White space,CARTER RD & SR-11,15.6,C,2,2,0.8,212.0,12000,4.5,29.096004999999998,-81.29710499999999,,,,
+119,Pasco,Golden,White space,BLANTON RD & TRILBY RD,15.5,C,2,2,1.3,34.0,8700,6.5,28.415950000000002,-82.25729000000001,,,,
+120,Clay,Bauer,White space,US-17 S & CR-15A,15.2,C,1,1,0.0,55.0,15500,3.5,29.93393,-81.68844,,,,
+121,Polk,McDonald,White space,SCENIC HWY & FORT MEADE RD,15.1,C,1,1,0.0,127.0,10900,11.5,27.7296,-81.53099,,,,
+122,Clay,Bauer,White space,SR-21 & CR-315C,14.9,C,1,1,0.0,42.0,14100,14.4,29.87734,-81.92649,,,,
+123,Polk,McDonald,Proven (7-Eleven built here since 2018),MASTERPIECE RD & TIMBERLANE RD,14.6,C,1,1,0.0,71.0,7000,4.7,27.96122,-81.53861,,,,
+124,St Johns,Bauer,White space,N CR-13A & CR-214,14.5,C,1,1,0.0,15.0,8000,7.8,29.85117,-81.49398,,,,
+125,St Johns,Bauer,White space,COWPEN BRANCH RD & S CR-13,13.7,C,1,1,0.0,188.0,3400,12.6,29.67819,-81.44884,,,,
+126,Clay,Bauer,White space,SR-100 & CR-219,13.7,C,1,1,0.0,102.0,9000,12.5,29.7481,-81.9929,,,,
+127,St Lucie,Antonacci,White space,OKEECHOBEE RD & CARLTON RD,12.6,C,1,1,0.0,8.0,11800,8.6,27.36692,-80.53634,,,,
+128,Brevard,Bauer,White space,AURANTIA RD & SR-5/US-1,12.6,C,1,1,0.0,199.0,7100,14.3,28.73257,-80.86639,GRANTLINE RD & SR-5/US-1,30.7,1.4,no raw parcel at corner
+129,Clay,Bauer,White space,SR-16 & CR-225,12.5,C,2,2,1.1,13.0,11300,11.3,29.973365,-82.01486,SR-16 & KINGSLEY LAKE DR,11.0,1.1,no raw parcel at corner
+130,Pasco,Golden,White space,JOHNSTON RD & BELLAMY BROTHERS RD,12.4,C,1,1,0.0,2.0,5400,7.0,28.40475,-82.37057,,,,
+131,Hillsborough,Golden,White space,KEYSVILLE RD & LITHIA PINECREST RD,12.2,C,1,1,0.0,21.0,10800,6.9,27.8506,-82.08785,,,,
+132,Polk,Polk west (TBD),White space,LAKE HENDRY RD & CR 640,11.9,C,2,2,2.5,31.0,4550,5.9,27.839105,-81.761155,,,,
+133,Volusia,Bauer,White space,EMPORIA RD & CR 3 & US-17,11.5,C,2,2,2.1,16.0,10300,5.4,29.196645,-81.43514,BLACKBURN RD & CR 3,11.2,1.1,no raw parcel at corner
+134,Polk,Polk west (TBD),White space,SR 37 & CR-630,11.0,C,1,1,0.0,0.0,10000,10.6,27.74308,-81.99752,FT GREEN RD & OLD HWY 37 & CR-630,11.3,1.5,no raw parcel at corner
+135,St Johns,Bauer,White space,CR 305 & S CR-13A,10.7,C,1,1,0.0,14.0,2100,8.2,29.79096,-81.4841,CR-13 & S CR-13A,11.3,0.9,no raw parcel at corner
+136,Volusia,Bauer,White space,DAUGHARTY RD & SR-11,10.3,C,3,3,2.0,21.0,8400,4.9,29.141743333333334,-81.28815333333334,,,,
+137,Brevard,Bauer,White space,DEERING PKWY & SR-5/US-1,10.1,C,1,1,0.0,39.0,7600,15.7,28.78113,-80.882,,,,
+138,Brevard,Bauer,White space,ADAMSON RD & SR-524,9.1,C,2,2,1.1,252.5,7500,2.6,28.368454999999997,-80.813585,FRIDAY RD & SR-524,18.9,1.4,no raw parcel at corner
+139,St Lucie,Antonacci,Proven (7-Eleven built here since 2018),BROCKSMITH RD & ORANGE AVE,8.8,C,4,3,2.5,218.0,4806,3.0,27.4475925,-80.4500575,,,,
+140,Volusia,Bauer,White space,US-1 & KENNEDY PKWY,8.8,C,1,1,0.0,33.0,6150,12.3,28.83367,-80.84168,,,,
+141,St Johns,Bauer,White space,SR-206 & CR 305,7.7,C,1,1,0.0,2.0,5800,9.1,29.7261,-81.4248,,,,
+142,St Lucie,Antonacci,White space,ORANGE AVE & SNEED RD,6.5,C,2,2,2.0,3.0,4506,7.1,27.447575,-80.51384999999999,,,,

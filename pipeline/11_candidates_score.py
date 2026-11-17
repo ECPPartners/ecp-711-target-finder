@@ -152,7 +152,7 @@ def score(f, ref=None):
     s['traffic'] = np.where(f.combined_aadt.isna(), 0.5, pct('combined_aadt', f.combined_aadt))
     s['gap_to_7eleven'] = np.clip((f.dist_to_7eleven_mi - 2) / 3, 0, 1)
     s['retail_node'] = 0.6 * np.clip(f.n_anchors, 0, 2) / 2 + 0.4 * np.clip(f.n_nationals, 0, 3) / 3
-    s['signal'] = np.where(f.fdot_signal, 1.0, np.where(f.signal_unknown, 0.5, 0.0))
+    s['signal'] = np.where(f.fdot_signal, 1.0, np.where(f.signal_unknown, OPTS.get('signal_unknown_credit', MODEL.get('signal_unknown_credit', 0.5)), 0.0))
     total = sum(s[k] * w for k, w in WEIGHTS.items())
     return s, total.round(1)
 

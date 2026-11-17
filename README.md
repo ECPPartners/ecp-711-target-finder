@@ -24,3 +24,8 @@ Front end lives in `artifact/` (index.html, app.css, app.js, vendor/leaflet.css)
 `b0ece350-ae01-4c2d-9013-37945df29fd0` ("7-Eleven Target Area Finder") with publish_files (mode patch, data/*.json only).
 Capabilities: db (collections: reviews, packs, submittals), user (profile), sample, downloads.
 11. `16_raw_corners.py dl/dor_x out out/candidates_scored_optionB.csv out/candidates_raw.csv <counties...>` — raw-land corner test (default filter, Nov 11 2026). `aerial_qa.csv` holds manual aerial-check exclusions.
+12. (v1.1+) `17_wetlands_pull.py <candidates.json> out/nwi_wetlands.geojson` — NWI wetlands around raw corners
+13. `18_land_screen.py dl/dor_x out/fdot out/nwi_wetlands.geojson <candidates.json> out/land.csv` — upland/frontage/owner screen
+14. `19_trade_areas.py out/land.csv out/corners.csv out/areas.csv` — trade areas → best corners
+15. `20_review_workbook.py out/land.csv out/corners.csv out/areas.csv <last_review.xlsx> <out.xlsx>` — deal-maker review workbook
+Run 17–20 with `MODEL=v1.1`.

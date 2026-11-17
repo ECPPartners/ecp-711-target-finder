@@ -47,8 +47,8 @@ def main(out, src_xlsx, step2_xlsx, dest):
     picked, P = [], []
     for i, x in c[c.raw_ok].sort_values('score', ascending=False).iterrows():
         y = (x.lat * 111320, x.lon * 111320 * math.cos(math.radians(x.lat)))
-        if all(math.hypot(y[0] - a, y[1] - b) > MODEL['output']['min_spacing_mi'] * 1609.344 for a, b in P): picked.append(i); P.append(y)
-        if len(picked) == MODEL['output']['top_n']: break
+        if all(math.hypot(y[0] - a, y[1] - b) > MODEL['output'].get('min_spacing_mi', 1.0) * 1609.344 for a, b in P): picked.append(i); P.append(y)
+        if len(picked) == MODEL['output'].get('top_n', 50): break
     c['top50'] = c.index.isin(picked)
     c['raw_rank'] = c[c.raw_ok].score.rank(ascending=False, method='first')
     # tiers are set within the default (raw-land) pool: A = top 15%, B = next 25%, C = rest; redevelopment corners keep
@@ -127,7 +127,7 @@ def main(out, src_xlsx, step2_xlsx, dest):
         'pilot': PILOT,
         'counts': {'intersections': 2459, 'candidates': int(len(c)), 'raw_ok': int(c.raw_ok.sum()), 'tierA': int((c.tier == 'A').sum()), 'tierA_raw': int(((c.tier == 'A') & c.raw_ok).sum()), 'tierB_raw': int(((c.tier == 'B') & c.raw_ok).sum()), 'tierB': int((c.tier == 'B').sum()),
                    'stores_pilot': int(len(net)), 'competitors': int(len(comp))},
-        'weight_options': recs(x['Weight Options'].dropna(subset=['Weights']).iloc[:2], list(x['Weight Options'].columns[:7])),
+        'weight_options': recs(x['Weight Options'].dropna(subset=['Weights']).iloc[:2], list(x['Weight Options'].columns[:7])) if 'Weight Options' in x else MODEL.get('backtest', {}),
         'method': recs(x['Method & Weights'], ['Item', 'Method']),
         'sources': recs(pd.read_excel(src_xlsx, sheet_name='Sources & Dates'), ['Dataset', 'Source', 'As of', 'Data class']),
         'gaps': recs(pd.read_excel(src_xlsx, sheet_name='Data Gaps'), ['Gap', 'Detail', 'Fix']),

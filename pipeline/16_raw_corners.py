@@ -53,7 +53,7 @@ def raw_parcels(cdir):
     g = g[g.acres >= MIN_SQFT / 43560]
     # ponds, buffers and other common-area remnants carry very low values; real non-ag land doesn't
     g = g[g.uc.isin(AG) | (g.JV / g.acres >= 15000)]
-    return g[['PARCEL_ID', 'uc', 'acres', 'OWN_NAME', 'PHY_ADDR1', 'geometry']]
+    return g[['PARCEL_ID', 'uc', 'acres', 'OWN_NAME', 'PHY_ADDR1', 'NO_BULDNG', 'geometry']]
 
 def main(dor_x, out, cand_csv, result, counties):
     raw = pd.concat([raw_parcels(os.path.join(dor_x, c.lower().replace(' ', '_'))) for c in counties], ignore_index=True)
