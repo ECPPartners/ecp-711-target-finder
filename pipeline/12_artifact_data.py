@@ -3,10 +3,12 @@ Usage: python3 -I 12_artifact_data.py <out_dir> <source.xlsx> <step2.xlsx> <arti
 """
 import sys, os, glob, json, hashlib
 import numpy as np, pandas as pd, geopandas as gpd
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from model import load_model
 
-PILOT = {'Duval': 'Bauer', 'St Johns': 'Bauer', 'Clay': 'Bauer', 'Volusia': 'Bauer', 'Brevard': 'Bauer',
-         'Pasco': 'Golden', 'Hillsborough': 'Golden', 'St Lucie': 'Antonacci', 'Polk': 'Polk'}
-WEIGHTS = {'new_rooftops': 30, 'rooftop_pipeline': 5, 'new_grocery': 10, 'traffic': 25, 'gap_to_7eleven': 10, 'retail_node': 10, 'signal': 10}
+MODEL = load_model()
+PILOT = MODEL['pilot_counties']
+WEIGHTS = MODEL['weights']
 FC_NAME = {'04': 'Rural principal arterial', '06': 'Rural minor arterial', '07': 'Rural major collector', '08': 'Rural minor collector',
            '14': 'Urban principal arterial', '16': 'Urban minor arterial', '17': 'Urban major collector', '18': 'Urban minor collector',
            '01': 'Interstate', '11': 'Interstate', '02': 'Expressway', '12': 'Expressway'}
@@ -45,14 +47,15 @@ def main(out, src_xlsx, step2_xlsx, dest):
     picked, P = [], []
     for i, x in c[c.raw_ok].sort_values('score', ascending=False).iterrows():
         y = (x.lat * 111320, x.lon * 111320 * math.cos(math.radians(x.lat)))
-        if all(math.hypot(y[0] - a, y[1] - b) > 1609.344 for a, b in P): picked.append(i); P.append(y)
-        if len(picked) == 50: break
+        if all(math.hypot(y[0] - a, y[1] - b) > MODEL['output']['min_spacing_mi'] * 1609.344 for a, b in P): picked.append(i); P.append(y)
+        if len(picked) == MODEL['output']['top_n']: break
     c['top50'] = c.index.isin(picked)
     c['raw_rank'] = c[c.raw_ok].score.rank(ascending=False, method='first')
     # tiers are set within the default (raw-land) pool: A = top 15%, B = next 25%, C = rest; redevelopment corners keep
     # their original all-candidate tier for reference
     q = c[c.raw_ok].score.rank(pct=True)
-    c.loc[c.raw_ok, 'tier'] = np.where(q >= 0.85, 'A', np.where(q >= 0.60, 'B', 'C'))
+    ta, tb = MODEL['tiers']['A_top_pct'] / 100, MODEL['tiers']['B_next_pct'] / 100
+    c.loc[c.raw_ok, 'tier'] = np.where(q >= 1 - ta, 'A', np.where(q >= 1 - ta - tb, 'B', 'C'))
     c['rank'] = c.score.rank(ascending=False, method='first').astype(int)
     c['signal'] = np.where(c.fdot_signal, 'Yes', np.where(c.signal_unknown, 'Unknown', 'No'))
     cols = ['id', 'rank', 'score', 'tier', 'top50', 'intersection_name', 'county', 're_manager', 'market_type', 'why_here', 'new_rooftops_3mi',
@@ -119,6 +122,7 @@ def main(out, src_xlsx, step2_xlsx, dest):
     dump(recs(bt, ['address', 'city', 'county', 'score', 'pct_rank_vs_all_intersections', 'new_rooftops_3mi', 'combined_aadt', 'market_type']), os.path.join(dest, 'backtest.json'))
     meta = {
         'built': pd.Timestamp.today().strftime('%Y-%m-%d'),
+        'model': {k: MODEL.get(k) for k in ['version', 'name', 'approved_by', 'approved_on', 'notes']},
         'weights': WEIGHTS,
         'pilot': PILOT,
         'counts': {'intersections': 2459, 'candidates': int(len(c)), 'raw_ok': int(c.raw_ok.sum()), 'tierA': int((c.tier == 'A').sum()), 'tierA_raw': int(((c.tier == 'A') & c.raw_ok).sum()), 'tierB_raw': int(((c.tier == 'B') & c.raw_ok).sum()), 'tierB': int((c.tier == 'B').sum()),

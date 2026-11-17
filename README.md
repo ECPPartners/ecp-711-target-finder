@@ -1,5 +1,7 @@
 # ECP 7-Eleven Target Area Finder — pipeline
 
+**Scoring models are versioned in `models/` (see models/README.md for history and how to revert). Env `MODEL=<version>` runs an older one.**
+
 Confidential to ECP Partners. Spec and build plan live in the claude.ai project "711 target area finder".
 
 Run order (pilot counties), from a work dir with `dl/` and `out/`:
