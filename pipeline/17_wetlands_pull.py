@@ -2,7 +2,7 @@
 Usage: python3 -I 17_wetlands_pull.py <candidates.csv|json> <out.geojson> [radius_m=400]
 Only corners with a raw parcel (raw_corner true) are queried. Source: fwspublicservices.wim.usgs.gov Wetlands MapServer.
 """
-import sys, json, math, requests
+import sys, json, math, time, requests
 import pandas as pd
 
 URL = 'https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/rest/services/Wetlands/MapServer/0/query'
@@ -14,13 +14,14 @@ def query(lat, lon, r):
         p = {'geometry': f'{lon - dlon},{lat - dlat},{lon + dlon},{lat + dlat}', 'geometryType': 'esriGeometryEnvelope',
              'inSR': 4326, 'spatialRel': 'esriSpatialRelIntersects', 'outFields': 'OBJECTID,ATTRIBUTE,WETLAND_TYPE,ACRES',
              'outSR': 4326, 'maxAllowableOffset': 0.00001, 'f': 'json', 'resultOffset': offset, 'resultRecordCount': 200}
-        for attempt in range(3):
+        for attempt in range(6):
             try:
                 r_ = requests.get(URL, params=p, timeout=120); r_.raise_for_status(); fc = r_.json()
                 if 'error' in fc: raise RuntimeError(fc['error'])
                 break
             except Exception as e:
-                if attempt == 2: raise
+                if attempt == 5: raise
+                time.sleep(10 * (attempt + 1))
         # esri JSON -> GeoJSON (NWI geometry fails without maxAllowableOffset; ~1 m generalization is fine at site scale)
         feats += [{'type': 'Feature', 'properties': f['attributes'], 'geometry': {'type': 'Polygon', 'coordinates': f['geometry']['rings']}}
                   for f in fc.get('features', [])]

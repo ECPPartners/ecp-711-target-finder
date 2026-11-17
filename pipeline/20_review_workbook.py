@@ -10,7 +10,7 @@ from openpyxl.utils import get_column_letter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from model import load_model
 
-M = load_model(); O = M['output']; RL = M['raw_land']
+M = load_model(); O = M['output']; RL = M['raw_land']; RM = M.get('review_readme', {})
 F = 'Arial'
 HDR = PatternFill('solid', start_color='1F3864'); YEL = PatternFill('solid', start_color='FFF2CC'); GRY = PatternFill('solid', start_color='EDEDED')
 key = lambda a, b: re.sub(r'[^A-Z0-9]', '', str(a).upper()) + re.sub(r'[^A-Z0-9]', '', str(b).upper())
@@ -24,7 +24,13 @@ def title(s):
         out.append(w)
     return ' & '.join(out)
 
-def sheet(wb, name, df, widths, yellow=(), links=()):
+WIDTH = {'Intersection': 34, 'Best corner': 34, 'Why here': 40, 'Other corners listed': 40, 'Also search (no raw parcel / screened)': 44,
+         'Luke (v1.0) on these corners': 40, 'Better corner in this area we missed': 34, 'Raw parcel owner': 26, 'Parcel ID': 20,
+         'Land use': 15, 'Owner flag': 22, 'Land warnings': 34, 'Competitor owns land here': 18, 'Nearest competitor': 20, 'Access flag': 22,
+         'Luke v1.0: why': 36, 'Why / why not': 30, 'What you already know': 24, 'Why screened out': 48, 'Best raw parcel owner': 28,
+         'Wrong? Put it back (Yes + why)': 30, 'Luke: why': 60, 'Item': 26, 'Setting': 120, 'County': 11, '7-Eleven RE manager': 13}
+
+def sheet(wb, name, df, widths=None, yellow=(), links=()):
     ws = wb.create_sheet(name)
     ws.append(list(df.columns))
     for c in ws[1]:
@@ -40,7 +46,8 @@ def sheet(wb, name, df, widths, yellow=(), links=()):
                 c.hyperlink = c.value; c.value = 'Open map'; c.font = Font(name=F, size=10, color='0563C1', underline='single')
             if isinstance(c.value, float): c.number_format = '0' if 'rank' in h.lower() else '#,##0.0'
             elif isinstance(c.value, int) and h not in ('Trade area', 'Corner #', 'v1.0 rank', 'Rank'): c.number_format = '#,##0'
-    for i, w in enumerate(widths, 1): ws.column_dimensions[get_column_letter(i)].width = w
+    for i, h in enumerate(df.columns, 1):
+        ws.column_dimensions[get_column_letter(i)].width = WIDTH.get(h, 10 if len(str(h)) < 14 else 14)
     ws.freeze_panes = 'B2'; ws.auto_filter.ref = ws.dimensions
     return ws
 
@@ -60,33 +67,19 @@ def main(land_csv, corners_csv, areas_csv, prior_xlsx, out):
         (f"7-Eleven Target Area Finder — model {M['version']} DRAFT for Ross", True),
         ('ECP Partners · Confidential · Do not share outside ECP', False),
         (f"Built {pd.Timestamp.today():%Y-%m-%d}. Not yet published to the live tool; v1.0 stays live until Ross approves this.", False),
-        ('', False), ('What changed from v1.0 (from Luke\'s Nov 17 review of the Top 50)', True),
-        ('1. Two-step list. The list is now trade areas first, then up to 3 corners in each. Corners within '
-         f"{O['trade_area_max_diameter_mi']:g} miles of each other share one trade area (they draw on most of the same new homes). "
-         'Trade areas rank by their best corner. Search the whole trade area, not just the corners listed.', False),
-        ('2. Tighter land screen. A corner now needs a raw parcel that (a) has at least '
-         f"{RL['min_upland_acres']} acres of upland within {RL['zone_m']} m (~{RL['zone_m'] * 3.28:.0f} ft) of the intersection after "
-         'removing mapped wetlands (US Fish & Wildlife National Wetlands Inventory), (b) fronts both roads, and (c) isn\'t owned by a '
-         'fuel/c-store competitor, 7-Eleven, a railroad or a utility. Walmart/Publix, church, hospital, school and government-affiliated '
-         'owners are flagged, not removed. Corners where a competitor owns land are flagged (often a station in the works).', False),
-        ('3. Scoring weights are unchanged from v1.0.', False),
-        ('4. Luke\'s v1.0 verdicts are carried onto the same corners (grey columns) so nobody re-reviews them.', False),
+        ('', False), ('What changed', True),
+    ] + [(t, False) for t in RM.get('changes', [])] + [
         ('', False), ('Tabs', True),
         (f"Trade Areas: top {O['top_n_trade_areas']} trade areas. Corners: the corners in those areas (yellow columns to fill in). "
-         'Screened Out: raw-land corners the new land screen removed, with the reason; rescue any that are wrong. '
-         'v1.0 Top 50 → v1.1: where each corner Luke saw ended up. Method: settings for this model.', False),
+         'Screened Out: raw-land corners the land screen removed, with the reason; rescue any that are wrong. '
+         f"v1.0 Top 50 → {M['version']}: where each corner Luke saw ended up. Method: settings for this model.", False),
         ('', False), ('PROPOSED — needs ECP confirmation', True),
         (f"• Trade area size: corners within {O['trade_area_max_diameter_mi']:g} mi of each other. • {O['corners_per_trade_area']} corners per area, "
-         f"{O['min_corner_spacing_mi']:g} mi apart. • Top {O['top_n_trade_areas']} areas. • Upland needed: {RL['min_upland_acres']} ac within "
-         f"{RL['zone_m']} m of the corner. • Frontage: parcel within {RL['frontage_m']} m of each road's centerline.", False),
+         f"{O['min_corner_spacing_mi']:g} mi apart. • Top {O['top_n_trade_areas']} areas. • Upland: {RL['min_upland_acres']} ac within "
+         f"{RL['zone_m']} m of the corner. • Frontage: parcel within {RL['frontage_m']} m of each road's centerline." + RM.get('proposed_extra', ''), False),
         ('', False), ('Known limits', True),
-        ('• NWI wetlands are mapped from aerials, sometimes decades old, and can be wrong in both directions. It removed Luke\'s Yes at '
-         'New Kings Rd & 45th St W (rank 15), which is in Screened Out for a second look. • The tax roll is as of Jan 1, 2026, so corners built '
-         'since then still look vacant (Luke\'s "corners all taken" at Community & Discovery and Henley & Sandridge aren\'t caught). '
-         '• Trade areas only contain corners that pass the land screen; a better corner without raw land won\'t appear.', False),
-        ('', False), ('Sources', True),
-        ('FL Dept. of Revenue 2026 final tax roll and parcel maps (downloaded 2026-11-17); FDOT functional classification roads '
-         '(pulled 2026-11-17); USFWS National Wetlands Inventory map service (pulled 2026-11-17); scores from model v1.0 (built 2026-11-11).', False),
+    ] + [(t, False) for t in RM.get('limits', [])] + [
+        ('', False), ('Sources', True), (RM.get('sources', ''), False),
     ]
     for t, b in lines:
         ws.append([t]); ws.cell(ws.max_row, 1).font = Font(name=F, bold=b, size=12 if b else 10)
@@ -102,6 +95,7 @@ def main(land_csv, corners_csv, areas_csv, prior_xlsx, out):
                      'Best corner': title(r.best_corner), 'Best score': r.best_score, 'Tier': r.tier,
                      'Corners passing land screen': int(r.corners_passing), 'Corners listed': int(r.corners_shown),
                      'Other corners listed': '; '.join(title(x) for x in sub.intersection_name.iloc[1:]) or '—',
+                     **({'Also search (no raw parcel / screened)': (f"{title(r.redev_corner)} ({r.redev_score:.1f}; {r.redev_mi_from_best} mi; {r.redev_why_not_listed})" if isinstance(r.get('redev_corner'), str) else '—')} if 'redev_corner' in r else {}),
                      'New homes 2023-25 (3 mi, max)': int(r.new_homes_3mi_max), 'Max combined AADT': None if pd.isna(r.aadt_max) else int(r.aadt_max),
                      'Nearest 7-Eleven (mi)': r.nearest_7eleven_mi,
                      'Luke (v1.0) on these corners': '; '.join(f"{title(x)}: {pv(k, 'Would you chase it?')}" for x, k in zip(sub.intersection_name, sub.k) if pv(k, 'Would you chase it?')) or '—',
@@ -118,6 +112,7 @@ def main(land_csv, corners_csv, areas_csv, prior_xlsx, out):
                      'Raw parcel owner': r.land_owner, 'Parcel ID': r.land_parcel, 'Land use': r.land_use, 'Parcel acres': r.land_acres,
                      'Upland ac near corner': r.land_upland_ac_corner, 'Wetland ac near corner': r.land_wetland_ac_corner,
                      'Owner flag': r.land_flags if isinstance(r.land_flags, str) else None,
+                     'Land warnings': r.land_warnings if isinstance(r.get('land_warnings'), str) and r.land_warnings else None,
                      'Competitor owns land here': r.land_competitor_owns_corner_land if isinstance(r.land_competitor_owns_corner_land, str) else None,
                      'Combined AADT (FDOT 2025)': None if pd.isna(r.combined_aadt) else int(r.combined_aadt), 'Signal': r.signal,
                      'Nearest 7-Eleven (mi)': round(r.dist_to_7eleven_mi, 1), 'Nearest competitor': r.nearest_competitor, 'Access flag': r.access_flag,
@@ -153,8 +148,8 @@ def main(land_csv, corners_csv, areas_csv, prior_xlsx, out):
         else:
             where = 'Screened out: ' + str(lmap.at[k, 'land_fail']) if k in lmap.index else 'not found'
         rows.append({'v1.0 rank': int(r.Rank), 'Intersection': r.Intersection, 'County': r.County, 'Luke: chase?': r['Would you chase it?'] if pd.notna(r['Would you chase it?']) else None,
-                     'Luke: why': r['Why / why not'] if pd.notna(r['Why / why not']) else None, 'Where it is in v1.1': where})
-    sheet(wb, 'v1.0 Top 50 → v1.1', pd.DataFrame(rows), [8, 40, 11, 9, 60, 60])
+                     'Luke: why': r['Why / why not'] if pd.notna(r['Why / why not']) else None, f"Where it is in {M['version']}": where})
+    sheet(wb, f"v1.0 Top 50 → {M['version']}", pd.DataFrame(rows), [8, 40, 11, 9, 60, 60])
 
     # Method
     meth = [('Model', f"{M['version']} — {M['name']} (status: {M['status']})"), ('Scope approved', M.get('scope_approved')),

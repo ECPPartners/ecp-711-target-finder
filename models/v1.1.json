@@ -94,5 +94,16 @@
       "#15 New Kings & 45th St W (Luke Yes): NWI shows forested wetland over the parcel; needs a look"
     ],
     "two_step": "Luke's same-trade-area groups now collapse: Babcock 5/10/32 -> area 5; Prospect 13/14 -> area 10; Becker 7/11 -> area 7; Brigantine/Community 6/22 -> area 6"
+  },
+  "review_readme": {
+    "changes": [
+      "1. Two-step list: trade areas first, then up to 3 corners in each. Corners within 3 miles of each other share one trade area. Search the whole trade area, not just the corners listed.",
+      "2. Tighter land screen: a raw parcel with 1.3+ upland acres within 150 m of the corner after mapped wetlands, fronting both roads, not owned by a competitor, 7-Eleven, railroad or utility. Walmart/Publix, church, hospital, school and government-affiliated owners are flagged.",
+      "3. Scoring weights unchanged from v1.0. 4. Luke's v1.0 verdicts carried over in grey columns."
+    ],
+    "limits": [
+      "\u2022 NWI wetlands can be wrong both ways. \u2022 Tax roll as of Jan 1, 2026. \u2022 Trade areas only contain corners that pass the land screen."
+    ],
+    "sources": "FL DOR 2026 tax roll and parcel maps; FDOT functional classification roads; USFWS NWI; scores from model v1.0. Pulled 2026-11-17."
   }
 }
