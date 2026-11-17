@@ -6,6 +6,7 @@
   "approved_on": "2026-11-11",
   "published_on": "2026-11-11",
   "artifact_version": "1794424326-c84f",
+  "pipeline_commit": "5262b64",
   "notes": "Weights approved Nov 3 (Tool Spec) then revised to Option B after the backtest; raw-land corner filter approved Nov 11. This is the model behind the Top 50 that Luke reviewed Nov 17.",
   "pilot_counties": {"Duval": "Bauer", "St Johns": "Bauer", "Clay": "Bauer", "Volusia": "Bauer", "Brevard": "Bauer",
                      "Pasco": "Golden", "Hillsborough": "Golden", "St Lucie": "Antonacci", "Polk": "Polk"},
