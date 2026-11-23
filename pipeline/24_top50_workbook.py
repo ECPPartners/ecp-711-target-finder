@@ -46,6 +46,8 @@ def main(top_csv, status_csv, prior_xlsx, out):
               '(north side of an east-west road = westbound, east side of a north-south road = northbound). Where a station is at the corner, it '
               'says whether the option is across the road from it (can outposition it for that direction) or on the same side. '
               'This is information for the deal maker; it does not change the score.', False),
+             *[(f"{rn} tab: trade areas whose best corner is in {', '.join(rc['counties'])}, ranked on their own (P1, P2a ...), up to {rc['top_n']} areas. "
+                'Same rules as the main list; not part of it.', False) for rn, rc in O.get('regions', {}).items()],
              (f"Highway Plays tab: up to {O.get('highway_top_n', 0)} corners with {O.get('highway_min_aadt', 0):,}+ cars/day in areas below the growth bar "
               f'(e.g. US-301 & CR-218). A separate short list, not part of the {TN}.', False),
              ('Grey columns carry Luke\'s v1.0 verdicts and Ross\'s Nov 23 comments. Yellow columns are for this review.', False), ('', False),
@@ -105,6 +107,12 @@ def main(top_csv, status_csv, prior_xlsx, out):
         prev = n
     ws2.freeze_panes = 'E2'
 
+    for rname in O.get('regions', {}):
+        rg = t[t.get('in_region_top', pd.Series(False, index=t.index)).fillna(False).astype(bool) & (t.region == rname)].copy()
+        if len(rg):
+            rg['n'] = rg.option.str.extract(r'(\d+)')[0].astype(int); rg = rg.sort_values(['n', 'option'])
+            sheet(wb, rname, pd.DataFrame([row(r, 'Option', r.option) for _, r in rg.iterrows()]),
+                  yellow=('Call 7-Eleven on it? (Yes / Maybe / No)', 'Why / why not', 'What you already know', 'Reviewer'), links=('Google Maps',))
     hw = t[t.highway_rank.notna()].sort_values('highway_rank') if 'highway_rank' in t else t.iloc[:0]
     if len(hw):
         hdf = pd.DataFrame([row(r, 'Highway #', int(r.highway_rank)) for _, r in hw.iterrows()])
@@ -130,6 +138,7 @@ def main(top_csv, status_csv, prior_xlsx, out):
         if k in tk.index:
             x = tk.loc[k]
             if x.get('in_top') == True: where = f"Option {x.option}"
+            elif x.get('in_region_top') == True: where = f"{x.region} tab, option {x.option}"
             elif isinstance(x.get('status'), str): where = f"Left out: {x.status} ({x.status_reason})"
             elif x.get('viable') != True: where = 'Not a viable corner: ' + (x.land_fail if isinstance(x.land_fail, str) and x.land_fail else 'no raw parcel and no one-owner land')
             elif pd.notna(x.get('highway_rank')): where = f"Highway play #{int(x.highway_rank)}"

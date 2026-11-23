@@ -11,6 +11,8 @@ good spacing from an existing 7-Eleven and multiple viable options per our crite
      min_secondary_score_ratio x the area's best, up to max_options_per_area. Labelled 1 (one option) or 2a, 2b, 2c.
   5. Highway plays: viable corners with highway_min_aadt+ combined AADT in areas below the growth bar, best score first,
      top highway_top_n (Ross, Nov 23: a separate short list rather than an exception to the Top 50).
+  6. (v1.5+) output.regions: trade areas whose best corner is in a region's counties (e.g. the Panhandle) are ranked on
+     their own list (P1, P2a ...), top_n each, and kept out of the main Top N and the highway list.
 Usage: python3 -I 23_top50_options.py <options.csv> <corner_status.csv> <out.csv>
 """
 import sys, os, re, string
@@ -40,13 +42,28 @@ def main(opt_csv, status_csv, out_csv):
     v['x'], v['y'] = xy[:, 0], xy[:, 1]
     growth = v.groupby('ta').new_rooftops_3mi.max()
     v['area_growth_ok'] = v.ta.map(growth >= O['min_area_new_homes'])
-    order = v[v.area_growth_ok].groupby('ta').score.max().sort_values(ascending=False).index
-    order = list(order) + [t for t in v.groupby('ta').score.max().sort_values(ascending=False).index if t not in set(order)]
-    v['area_rank'] = v.ta.map({t: i + 1 for i, t in enumerate(order)})
+    # region of each trade area = region of its best corner
+    best_county = v.sort_values('score', ascending=False).groupby('ta').county.first()
+    reg_of = {}
+    for rname, rc in O.get('regions', {}).items():
+        for t, cty in best_county.items():
+            if cty in set(rc['counties']): reg_of[t] = rname
+    v['region'] = v.ta.map(reg_of)
+    prefix = {None: ''} | {k: rc.get('label_prefix', k[:1]) for k, rc in O.get('regions', {}).items()}
+    def ranking(mask):
+        g_ = v[mask]
+        o_ = list(g_[g_.area_growth_ok].groupby('ta').score.max().sort_values(ascending=False).index)
+        o_ += [t for t in g_.groupby('ta').score.max().sort_values(ascending=False).index if t not in set(o_)]
+        return {t: i + 1 for i, t in enumerate(o_)}
+    rank = ranking(v.region.isna())
+    for rname in O.get('regions', {}): rank |= ranking(v.region == rname)
+    v['area_rank'] = v.ta.map(rank)
+    v['area_key'] = v.region.fillna('') + '|' + v.area_rank.astype(str)
     v['road_pts'] = v.pts_traffic.fillna(0) + v.pts_signal.fillna(0)
     v = v.sort_values(['area_rank', 'road_pts', 'score'], ascending=[True, False, False])
     lab = {}
-    for t, sub in v.groupby('area_rank'):
+    for ak, sub in v.groupby('area_key'):
+        t = prefix[sub.region.iloc[0] if isinstance(sub.region.iloc[0], str) else None] + str(int(sub.area_rank.iloc[0]))
         floor = sub.score.max() * O['min_secondary_score_ratio']
         chosen = []
         # raw land first (ECP's default since Nov 11), then one-owner land fills open slots; both by score
@@ -61,18 +78,22 @@ def main(opt_csv, status_csv, out_csv):
         for n, i in enumerate(chosen):
             lab[i] = f'{t}' if len(chosen) == 1 else f'{t}{string.ascii_lowercase[n]}'
     v['option'] = pd.Series(lab)
-    v['in_top'] = v.option.notna() & (v.area_rank <= O['top_n_trade_areas']) & v.area_growth_ok
-    hw = v[v.area_growth_ok.eq(False) & (v.combined_aadt >= O.get('highway_min_aadt', 1e12))].sort_values('score', ascending=False)
+    v['in_top'] = v.option.notna() & (v.area_rank <= O['top_n_trade_areas']) & v.area_growth_ok & v.region.isna()
+    v['in_region_top'] = False
+    for rname, rc in O.get('regions', {}).items():
+        v.loc[v.option.notna() & (v.region == rname) & (v.area_rank <= rc['top_n']) & v.area_growth_ok, 'in_region_top'] = True
+    hw = v[v.area_growth_ok.eq(False) & v.region.isna() & (v.combined_aadt >= O.get('highway_min_aadt', 1e12))].sort_values('score', ascending=False)
     hw = hw.head(O.get('highway_top_n', 0))
     v['highway_rank'] = pd.Series({i: n + 1 for n, i in enumerate(hw.index)})
-    v['area_options'] = v.groupby('area_rank').option.transform('count')
-    v['area_viable_corners'] = v.groupby('area_rank').option.transform('size')
+    v['area_options'] = v.groupby('area_key').option.transform('count')
+    v['area_viable_corners'] = v.groupby('area_key').option.transform('size')
     out = pd.concat([v.drop(columns=['x', 'y']), c[~c.viable]], ignore_index=True)
     out.to_csv(out_csv, index=False)
     top = v[v.in_top]
     print('viable corners', len(v), '| trade areas', v.ta.nunique(), '| Top', O['top_n_trade_areas'], 'areas ->', len(top), 'options',
           '| areas with 2+ options', int((top.groupby('area_rank').size() > 1).sum()),
-          '| raw/redev', dict(top.option_type.value_counts()), '| highway plays', int(v.highway_rank.notna().sum()))
+          '| raw/redev', dict(top.option_type.value_counts()), '| highway plays', int(v.highway_rank.notna().sum()),
+          '| region lists', {r: int((v.in_region_top & (v.region == r)).sum()) for r in O.get('regions', {})})
 
 if __name__ == '__main__':
     main(*sys.argv[1:4])
