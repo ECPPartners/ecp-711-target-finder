@@ -41,6 +41,10 @@ def load(out, wb):
     parcels = pd.concat([pd.read_csv(p, dtype={'pid': str, 'uc': str}) for p in glob.glob(os.path.join(out, 'parcels', 'parcels_*.csv'))])
     parcels = gpd.GeoDataFrame(parcels, geometry=gpd.points_from_xy(parcels.lon, parcels.lat), crs=4326).to_crs(3086)
     se = pd.read_csv(os.path.join(out, 'seven_eleven_fl.csv'))
+    # 7-Elevens the team knows about that the sources don't have yet (new openings, under construction)
+    man = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'manual_7eleven.csv')
+    if MODEL.get('use_manual_7eleven') and os.path.exists(man):
+        se = pd.concat([se, pd.read_csv(man, dtype={'store_ref': str})], ignore_index=True)
     se = gpd.GeoDataFrame(se, geometry=gpd.points_from_xy(se.lon, se.lat), crs=4326).to_crs(3086)
     net = pd.read_excel(wb, sheet_name='7-Eleven Network', dtype={'store_ref': str})
     stores = gpd.read_file(os.path.join(out, 'stores_fl.geojson')).to_crs(3086)

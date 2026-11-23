@@ -29,3 +29,8 @@ Capabilities: db (collections: reviews, packs, submittals), user (profile), samp
 14. `19_trade_areas.py out/land.csv out/corners.csv out/areas.csv` — trade areas → best corners
 15. `20_review_workbook.py out/land.csv out/corners.csv out/areas.csv <last_review.xlsx> <out.xlsx>` — deal-maker review workbook
 Run 17–20 with `MODEL=v1.1`.
+16. (v1.2+) `21_rail_pull.py out/fdot/fdot_rail.geojson` — FDOT rail lines for the rail warning
+17. (v1.3+) `22_corner_options.py dl/dor_x out/fdot out/fdep_stations_fl.csv out/land.csv out/options.csv` — one-owner land, stations at the corner, road side
+18. `23_top50_options.py out/options.csv reviews/corner_status.csv out/top50.csv` — Top 50 trade areas with a/b/c options
+19. `24_top50_workbook.py out/top50.csv reviews/corner_status.csv <last_review.xlsx> <out.xlsx>`
+Team-maintained inputs: `pipeline/manual_7eleven.csv` (7-Elevens the sources miss) and `reviews/corner_status.csv` (corners taken or passed).
