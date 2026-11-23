@@ -1,12 +1,12 @@
 {
   "version": "v1.5",
   "name": "v1.4 minus Miami-Dade/Broward/Palm Beach; Panhandle as its own list",
-  "status": "draft",
-  "approved_by": null,
-  "approved_on": null,
-  "published_on": null,
-  "artifact_version": null,
-  "pipeline_commit": null,
+  "status": "published",
+  "approved_by": "Ross Kirchman",
+  "approved_on": "2026-11-23",
+  "published_on": "2026-11-23",
+  "artifact_version": "1795471949-2047",
+  "pipeline_commit": "51a2a0c",
   "notes": "Same weights, land screen, options and thresholds as v1.3. County-to-manager assignment read from the Feb 2026 7-Eleven team map by Claude (inferred where the map names regions, not counties). Polk kept from the pilot (east of US-27 is McDonald's). Bradford included whole (only east of US-301 is Bauer's). Wakulla, Taylor, Union, Hamilton and Lafayette are not named on the map and are left out. DeSoto left out for now: the DOR 2026 final tax roll (NAL) file for DeSoto is not posted on the DOR portal (checked 2026-11-23). Miami-Dade, Broward and Palm Beach removed at Ross's request (their 7-Elevens still count for the 2-mile spacing). Panhandle = counties west of the Aucilla River (Claude's definition): Escambia, Santa Rosa, Okaloosa, Walton, Holmes, Washington, Bay, Jackson, Calhoun, Gulf, Gadsden, Liberty, Franklin, Leon, Jefferson; ranked on its own list.",
   "pilot_counties": {
     "Nassau": "Bauer",
@@ -162,7 +162,7 @@
     "pct_in_top_25": 54,
     "note": "7-Elevens built 2018+ in the v1.5 counties"
   },
-  "snapshot": "models/snapshots/v1.5-draft/",
+  "snapshot": "models/snapshots/v1.5/",
   "scope_approved": "Ross, 2026-11-23: run the model on all counties in the Golden, Bauer and Antonacci territories (Florida only); about 3x the pilot population, so a Top 150 instead of a Top 50. Ross, 2026-11-23 follow-up: Panhandle as its own tab outside the Top 150; remove Miami-Dade, Broward and Palm Beach (ECP does not want to pursue them).",
   "signal_unknown_credit": 0.5,
   "use_manual_7eleven": true,

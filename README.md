@@ -34,3 +34,5 @@ Run 17–20 with `MODEL=v1.1`.
 18. `23_top50_options.py out/options.csv reviews/corner_status.csv out/top50.csv` — Top 50 trade areas with a/b/c options
 19. `24_top50_workbook.py out/top50.csv reviews/corner_status.csv <last_review.xlsx> <out.xlsx>`
 Team-maintained inputs: `pipeline/manual_7eleven.csv` (7-Elevens the sources miss) and `reviews/corner_status.csv` (corners taken or passed).
+
+Front end: `frontend/` holds the live tool page (index.html, app.js, app.css) as published with each model version; data files come from step 12 plus the Top N option fields.
