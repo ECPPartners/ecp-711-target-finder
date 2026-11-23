@@ -1,0 +1,2 @@
+store_ref,brand,address,city,zip,lat,lon,has_fuel,diesel,source,county,added_by,added_on,note
+MANUAL-001,7-Eleven,NEC Silver Palm Blvd & SR-52 (approx. location),Hudson,,28.3313,-82.5582,Y,,Deal-maker knowledge: Luke 2026-11-17 and Ross 2026-11-23 (not in FDEP or 7-Eleven store API as of 2026-10-31),Pasco,Luke / Ross,2026-11-23,"Across SR-52 from RaceTrac (SWC). Exact address still needed."

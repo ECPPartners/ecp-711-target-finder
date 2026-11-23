@@ -1,0 +1,104 @@
+{
+  "version": "v1.3",
+  "name": "v1.2 scoring + Top 50 trade areas with a/b/c corner options",
+  "status": "draft",
+  "approved_by": null,
+  "approved_on": null,
+  "published_on": null,
+  "artifact_version": null,
+  "pipeline_commit": null,
+  "notes": "Scoring weights as v1.2. Adds: deal-maker known 7-Eleven stores (pipeline/manual_7eleven.csv), deal-maker corner status (reviews/corner_status.csv: taken/pass), one-owner redevelopment options, station-at-corner and road-side positioning notes (information only). PROPOSED until Ross approves.",
+  "pilot_counties": {
+    "Duval": "Bauer",
+    "St Johns": "Bauer",
+    "Clay": "Bauer",
+    "Volusia": "Bauer",
+    "Brevard": "Bauer",
+    "Pasco": "Golden",
+    "Hillsborough": "Golden",
+    "St Lucie": "Antonacci",
+    "Polk": "Polk"
+  },
+  "weights": {
+    "new_rooftops": 25,
+    "rooftop_pipeline": 5,
+    "new_grocery": 10,
+    "traffic": 35,
+    "gap_to_7eleven": 5,
+    "retail_node": 10,
+    "signal": 10
+  },
+  "mf_weight": 0.5,
+  "hard_filters": {
+    "min_miles_to_7eleven_fuel": 2.0
+  },
+  "raw_land": {
+    "min_acres": 1.3,
+    "touch_m": 50,
+    "exclude_owner_types": [
+      "government",
+      "school board",
+      "CDD",
+      "HOA/POA",
+      "utility",
+      "water management"
+    ],
+    "zone_m": 150,
+    "min_upland_acres": 1.3,
+    "wetland_screen": true,
+    "wetland_source": "USFWS National Wetlands Inventory (all mapped wetland and water types)",
+    "require_two_road_frontage": true,
+    "frontage_m": 45,
+    "same_road_angle_deg": 30,
+    "exclude_competitor_owned": true,
+    "exclude_owner_regex": "RACE ?TRAC|CIRCLE K|\\bWAWA\\b|MURPHY (OIL|USA)|SUNOCO|BUC-?EE|SPEEDWAY|7-?ELEVEN|SEVEN ELEVEN|7 ELEVEN|EXXON|MOBIL\\b|CUMBERLAND FARMS|GATE PETROLEUM|SHEETZ|QUIKTRIP|PILOT TRAVEL|LOVE'?S TRAVEL|KANGAROO|MAPCO|\\bRAIL(ROAD|WAY)\\b|\\bCSX\\b|FLORIDA EAST COAST|DUKE ENERGY|FLORIDA POWER|TAMPA ELECTRIC|\\bTECO\\b|SEMINOLE ELECTRIC",
+    "flag_owner_regex": {
+      "Walmart/Publix (check fuel deed restriction)": "WAL-?\\s?MART|WALMART|PUBLIX",
+      "Church": "CHURCH|IGLESIA|MINIST(RY|RIES|ERIO)|BAPTIST(?! HOSPITAL)|METHODIST|CATHOLIC|DIOCESE|PRESBYTER|LUTHERAN|ASSEMBLY OF GOD|CONGREGATION|MOSQUE|\\bTEMPLE\\b|FELLOWSHIP",
+      "Hospital/health system": "HOSPITAL|HEALTH ?SYSTEM|MEDICAL CENTER|ADVENTHEALTH|BAYCARE|ORLANDO HEALTH|HCA\\b",
+      "School/college": "SCHOOL|UNIVERSITY|COLLEGE|ACADEMY",
+      "Government-affiliated": "GOVERNMENTAL|GOVT|MUNICIPAL|PUBLIC FINANCE"
+    },
+    "competitor_regex": "RACE ?TRAC|CIRCLE K|\\bWAWA\\b|MURPHY (OIL|USA)|SUNOCO|BUC-?EE|SPEEDWAY|7-?ELEVEN|SEVEN ELEVEN|7 ELEVEN|EXXON|MOBIL\\b|CUMBERLAND FARMS|GATE PETROLEUM|SHEETZ|QUIKTRIP|PILOT TRAVEL|LOVE'?S TRAVEL|KANGAROO|MAPCO",
+    "hard_tests": [
+      "owner",
+      "min_zone_acres"
+    ],
+    "min_zone_acres": 1.0,
+    "rail_warning": true,
+    "rail_m": 30,
+    "houses_warning": true
+  },
+  "tiers": {
+    "A_top_pct": 15,
+    "B_next_pct": 25,
+    "pool": "corners passing the v1.1 land screen"
+  },
+  "output": {
+    "mode": "top_trade_areas_with_options",
+    "trade_area_max_diameter_mi": 3.0,
+    "trade_area_rank_by": "best option score",
+    "top_n_trade_areas": 50,
+    "max_options_per_area": 5,
+    "min_secondary_score_ratio": 0.6,
+    "corners_per_trade_area": 5,
+    "show_redevelopment_corner": false,
+    "min_area_new_homes": 500,
+    "option_order": "best roads first: traffic + signal points, then total score",
+    "highway_min_aadt": 40000,
+    "highway_top_n": 15
+  },
+  "backtest": {
+    "note": "weights unchanged from v1.2; v1.2 backtest applies (74th pct). Manual 7-Eleven store slightly changes gap scores near Silver Palm & SR-52."
+  },
+  "snapshot": "models/snapshots/v1.3-draft/",
+  "scope_approved": "Ross, 2026-11-23: Top 50 list where strong trade areas list every viable corner as 2a, 2b, 2c; from Ross's comments on Luke's No/Maybe corners. Ross, 2026-11-23 follow-up: max 5 options per area (confirmed); no spacing between options, pick and order them by best roads; highway plays (40,000+ AADT below the growth bar) as a separate short list.",
+  "signal_unknown_credit": 0.5,
+  "use_manual_7eleven": true,
+  "corner_status_file": "reviews/corner_status.csv",
+  "options": {
+    "redev_min_acres": 1.3,
+    "station_m": 120,
+    "redev_max_buildings": 1
+  }
+}

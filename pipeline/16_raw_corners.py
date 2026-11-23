@@ -43,17 +43,18 @@ def raw_parcels(cdir):
     keep = (vac | ag) & (n.JV.fillna(0) >= 5000) & n.PUBLIC_LND.isna() & (n.JV_CONSRV_LND.fillna(0) == 0) \
            & ~n.OWN_NAME.fillna('').str.upper().str.contains(BAD_OWNER)
     n = n[keep].copy(); n['key'] = n.PARCEL_ID.map(norm)
-    pin = pyogrio.read_dataframe(shp)
+    pin = pyogrio.read_dataframe(shp, on_invalid='ignore')
     idcol = [c for c in pin.columns if c != 'geometry'][0]
     pin['key'] = pin[idcol].map(norm)
-    pin = pin[pin.key.isin(set(n.key))].to_crs(3086)
+    pin = pin[pin.key.isin(set(n.key)) & pin.geometry.notna()].to_crs(3086)
+    pin['geometry'] = pin.geometry.make_valid()   # a few county maps have broken rings
     pin = pin.dissolve(by='key').reset_index()
     g = pin.merge(n, on='key')
     g['acres'] = np.where(g.LND_SQFOOT > 0, g.LND_SQFOOT, g.geometry.area * 10.7639) / 43560
     g = g[g.acres >= MIN_SQFT / 43560]
     # ponds, buffers and other common-area remnants carry very low values; real non-ag land doesn't
     g = g[g.uc.isin(AG) | (g.JV / g.acres >= 15000)]
-    return g[['PARCEL_ID', 'uc', 'acres', 'OWN_NAME', 'PHY_ADDR1', 'geometry']]
+    return g[['PARCEL_ID', 'uc', 'acres', 'OWN_NAME', 'PHY_ADDR1', 'NO_BULDNG', 'geometry']]
 
 def main(dor_x, out, cand_csv, result, counties):
     raw = pd.concat([raw_parcels(os.path.join(dor_x, c.lower().replace(' ', '_'))) for c in counties], ignore_index=True)

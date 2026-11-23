@@ -1,0 +1,128 @@
+{
+  "version": "v1.2",
+  "name": "Traffic-weighted scoring + land screen as warnings + redevelopment corner",
+  "status": "draft",
+  "approved_by": null,
+  "approved_on": null,
+  "published_on": null,
+  "artifact_version": null,
+  "pipeline_commit": null,
+  "notes": "Thresholds and weights PROPOSED until Ross approves after the backtest and his blind review.",
+  "pilot_counties": {
+    "Duval": "Bauer",
+    "St Johns": "Bauer",
+    "Clay": "Bauer",
+    "Volusia": "Bauer",
+    "Brevard": "Bauer",
+    "Pasco": "Golden",
+    "Hillsborough": "Golden",
+    "St Lucie": "Antonacci",
+    "Polk": "Polk"
+  },
+  "weights": {
+    "new_rooftops": 25,
+    "rooftop_pipeline": 5,
+    "new_grocery": 10,
+    "traffic": 35,
+    "gap_to_7eleven": 5,
+    "retail_node": 10,
+    "signal": 10
+  },
+  "mf_weight": 0.5,
+  "hard_filters": {
+    "min_miles_to_7eleven_fuel": 2.0
+  },
+  "raw_land": {
+    "min_acres": 1.3,
+    "touch_m": 50,
+    "exclude_owner_types": [
+      "government",
+      "school board",
+      "CDD",
+      "HOA/POA",
+      "utility",
+      "water management"
+    ],
+    "zone_m": 150,
+    "min_upland_acres": 1.3,
+    "wetland_screen": true,
+    "wetland_source": "USFWS National Wetlands Inventory (all mapped wetland and water types)",
+    "require_two_road_frontage": true,
+    "frontage_m": 45,
+    "same_road_angle_deg": 30,
+    "exclude_competitor_owned": true,
+    "exclude_owner_regex": "RACE ?TRAC|CIRCLE K|\\bWAWA\\b|MURPHY (OIL|USA)|SUNOCO|BUC-?EE|SPEEDWAY|7-?ELEVEN|SEVEN ELEVEN|7 ELEVEN|EXXON|MOBIL\\b|CUMBERLAND FARMS|GATE PETROLEUM|SHEETZ|QUIKTRIP|PILOT TRAVEL|LOVE'?S TRAVEL|KANGAROO|MAPCO|\\bRAIL(ROAD|WAY)\\b|\\bCSX\\b|FLORIDA EAST COAST|DUKE ENERGY|FLORIDA POWER|TAMPA ELECTRIC|\\bTECO\\b|SEMINOLE ELECTRIC",
+    "flag_owner_regex": {
+      "Walmart/Publix (check fuel deed restriction)": "WAL-?\\s?MART|WALMART|PUBLIX",
+      "Church": "CHURCH|IGLESIA|MINIST(RY|RIES|ERIO)|BAPTIST(?! HOSPITAL)|METHODIST|CATHOLIC|DIOCESE|PRESBYTER|LUTHERAN|ASSEMBLY OF GOD|CONGREGATION|MOSQUE|\\bTEMPLE\\b|FELLOWSHIP",
+      "Hospital/health system": "HOSPITAL|HEALTH ?SYSTEM|MEDICAL CENTER|ADVENTHEALTH|BAYCARE|ORLANDO HEALTH|HCA\\b",
+      "School/college": "SCHOOL|UNIVERSITY|COLLEGE|ACADEMY",
+      "Government-affiliated": "GOVERNMENTAL|GOVT|MUNICIPAL|PUBLIC FINANCE"
+    },
+    "competitor_regex": "RACE ?TRAC|CIRCLE K|\\bWAWA\\b|MURPHY (OIL|USA)|SUNOCO|BUC-?EE|SPEEDWAY|7-?ELEVEN|SEVEN ELEVEN|7 ELEVEN|EXXON|MOBIL\\b|CUMBERLAND FARMS|GATE PETROLEUM|SHEETZ|QUIKTRIP|PILOT TRAVEL|LOVE'?S TRAVEL|KANGAROO|MAPCO",
+    "hard_tests": [
+      "owner",
+      "min_zone_acres"
+    ],
+    "min_zone_acres": 1.0,
+    "rail_warning": true,
+    "rail_m": 30,
+    "houses_warning": true
+  },
+  "tiers": {
+    "A_top_pct": 15,
+    "B_next_pct": 25,
+    "pool": "corners passing the v1.1 land screen"
+  },
+  "output": {
+    "mode": "trade_areas",
+    "trade_area_max_diameter_mi": 3.0,
+    "trade_area_rank_by": "best corner score",
+    "corners_per_trade_area": 3,
+    "top_n_trade_areas": 25,
+    "min_corner_spacing_mi": 0.5,
+    "show_redevelopment_corner": true,
+    "redevelopment_radius_mi": 1.5,
+    "min_secondary_score_ratio": 0.6
+  },
+  "backtest": {
+    "run": "2026-11-17 on rebuilt data (rebuilt v1.0 reproduces the published scores at r=0.996; backtest 76th pct, 51% top quarter vs 76/54% published)",
+    "v1.0 weights": {
+      "recent_builds_median_pct": 76,
+      "pct_in_top_25": 51,
+      "legacy_median_pct": 62,
+      "luke_spearman": 0.17
+    },
+    "v1.2 weights (traffic 35)": {
+      "recent_builds_median_pct": 74,
+      "pct_in_top_25": 50,
+      "legacy_median_pct": "~70",
+      "luke_spearman": 0.33
+    },
+    "v1.2 weights + signal unknown 0.25 (not adopted)": {
+      "recent_builds_median_pct": 74,
+      "pct_in_top_25": 47,
+      "luke_spearman": 0.33,
+      "why_not": "new 7-Elevens are often on county roads FDOT doesn't track for signals; quarter credit pushed them down"
+    }
+  },
+  "snapshot": "models/snapshots/v1.2-draft/",
+  "scope_approved": "Ross, 2026-11-17: build items 1 (land screen as warnings, rail/houses warnings), 2 (traffic weights, after backtest), 3 (signal unknown at quarter credit; tested, not adopted: see backtest), 4 (redevelopment corner per trade area), 5 (7-Eleven data gap at #27) from Luke's full review; Ross (not Jacob) does the blind review.",
+  "signal_unknown_credit": 0.5,
+  "review_readme": {
+    "changes": [
+      "1. Scoring now leans on traffic: traffic 35 points (was 25), new homes 25 (was 30), gap to the nearest 7-Eleven 5 (was 10). In Luke's 50 answers, traffic separated his Yes from his No; new homes didn't, because every corner on the list already has strong growth.",
+      "2. The land screen warns instead of removing. Only competitor/7-Eleven/rail/utility-owned parcels and parcels with less than 1.0 acre near the corner are removed. Mapped wetlands, a parcel with under 1.3 upland acres, a parcel on one road only, a rail line at the parcel, and a farm parcel with buildings on it now show in the 'Land warnings' column. v1.1's version removed 3 of Luke's 19 Yes corners.",
+      "3. Each trade area names one more corner to search: the best-scoring nearby corner that has no usable raw parcel in the tax data (redevelopment land), in 'Also search'.",
+      "4. Trade areas (corners within 3 miles of each other, up to 3 corners each) stay from v1.1. Luke's verdicts carry over in grey columns."
+    ],
+    "limits": [
+      "\u2022 Weights were tuned against Luke's 50 answers, then checked against the 74 7-Elevens built in the pilot counties since 2018: those stores rank at the 74th percentile (v1.0: 76th). Traffic-heavy scoring also lifts older urban 7-Eleven locations, which may not reflect today's strategy.",
+      "\u2022 Tested and NOT adopted: scoring 'signal unknown' at a quarter instead of half credit. New 7-Elevens are often on county roads FDOT doesn't track for signals, so it pushed them down.",
+      "\u2022 Luke says a 7-Eleven is already at Silver Palm Blvd & SR-52 (Pasco); our store data (FDEP tanks + 7-Eleven's store list, Oct 31/Nov 11) shows none within 2.7 mi. Need the address to fix the source.",
+      "\u2022 NWI wetlands are mapped from aerials that can be decades old. The tax roll is as of Jan 1, 2026, so corners built since then still look vacant."
+    ],
+    "sources": "FL Dept. of Revenue 2026 final tax roll and parcel maps; FDOT 2025 AADT, functional classification, signals, medians and 2025 rail layers; USFWS National Wetlands Inventory; AllThePlaces store runs Oct 10/17/31 2026; FDEP registered storage tanks; ECP 7-Eleven sales tracker 11/11/26. All pulled or rebuilt 2026-11-17.",
+    "proposed_extra": " \u2022 Weights: traffic 35, new homes 25, gap 5. \u2022 Removal only below 1.0 ac near the corner. \u2022 Extra corners in a trade area must score at least 60% of its best corner."
+  }
+}

@@ -5,7 +5,15 @@ Layers: AADT (with truck factor), functional classification, local road names, t
 import sys, os, json, requests
 
 FDOT = "https://services1.arcgis.com/O1JpcwDW8sjYuddV/arcgis/rest/services"
-COUNTY_LIKE = ['%DUVAL%', '%JOHNS%', '%CLAY%', '%VOLUSIA%', '%BREVARD%', '%PASCO%', '%HILLSBOROUGH%', '%LUCIE%', '%POLK%']
+# counties come from the model (v1.0 pilot list kept as the default)
+try:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from model import load_model
+    _pc = load_model().get('pilot_counties', {})
+except Exception:
+    _pc = {}
+_LIKE = {'St Johns': 'JOHNS', 'St Lucie': 'LUCIE', 'Miami-Dade': 'DADE', 'Indian River': 'INDIAN', 'Palm Beach': 'PALM', 'Santa Rosa': 'SANTA', 'DeSoto': 'SOTO'}
+COUNTY_LIKE = [f"%{_LIKE.get(c, c.upper())}%" for c in _pc] or ['%DUVAL%', '%JOHNS%', '%CLAY%', '%VOLUSIA%', '%BREVARD%', '%PASCO%', '%HILLSBOROUGH%', '%LUCIE%', '%POLK%']
 LAYERS = {
     'aadt': 'Annual_Average_Daily_Traffic_TDA',
     'funclass': 'Functional_Classification_TDA',
