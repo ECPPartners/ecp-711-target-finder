@@ -43,10 +43,11 @@ def raw_parcels(cdir):
     keep = (vac | ag) & (n.JV.fillna(0) >= 5000) & n.PUBLIC_LND.isna() & (n.JV_CONSRV_LND.fillna(0) == 0) \
            & ~n.OWN_NAME.fillna('').str.upper().str.contains(BAD_OWNER)
     n = n[keep].copy(); n['key'] = n.PARCEL_ID.map(norm)
-    pin = pyogrio.read_dataframe(shp)
+    pin = pyogrio.read_dataframe(shp, on_invalid='ignore')
     idcol = [c for c in pin.columns if c != 'geometry'][0]
     pin['key'] = pin[idcol].map(norm)
-    pin = pin[pin.key.isin(set(n.key))].to_crs(3086)
+    pin = pin[pin.key.isin(set(n.key)) & pin.geometry.notna()].to_crs(3086)
+    pin['geometry'] = pin.geometry.make_valid()   # a few county maps have broken rings
     pin = pin.dissolve(by='key').reset_index()
     g = pin.merge(n, on='key')
     g['acres'] = np.where(g.LND_SQFOOT > 0, g.LND_SQFOOT, g.geometry.area * 10.7639) / 43560

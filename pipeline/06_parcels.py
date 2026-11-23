@@ -47,7 +47,7 @@ def main(zdir, work, out, counties):
         nal = nal[nal.kind.notna()].copy()
         nal.loc[nal.kind == 'res', 'units'] = nal.loc[nal.kind == 'res', 'units'].fillna(1).clip(lower=1)
         nal['key'] = nal.PARCEL_ID.map(norm)
-        pin = pyogrio.read_dataframe(shp)
+        pin = pyogrio.read_dataframe(shp, on_invalid='ignore')
         idcol = [c for c in pin.columns if c != 'geometry'][0]
         pin['key'] = pin[idcol].map(norm)
         pin = pin[pin.key.isin(set(nal.key))]

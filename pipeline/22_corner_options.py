@@ -37,7 +37,20 @@ def nm(s): return re.sub(r'[^A-Z0-9]', '', str(s or '').upper())
 def all_parcels_near(cdir, zones):
     nal_csv = glob.glob(os.path.join(cdir, '**', 'NAL*.csv'), recursive=True)[0]
     shp = [p for p in glob.glob(os.path.join(cdir, '**', '*.shp'), recursive=True) if 'pin' in p.lower()][0]
-    pin = pyogrio.read_dataframe(shp).to_crs(3086)
+    # read only the parcels under the corner zones (whole big-county maps don't fit in memory)
+    # (bbox reads per 10 km cell of corners; a mask read fails on the broken rings some county maps have)
+    crs = pyogrio.read_info(shp)['crs']
+    zz = zones.to_crs(crs)
+    c3 = zones.geometry.centroid
+    cell = (c3.x // 10000).astype(int).astype(str) + '_' + (c3.y // 10000).astype(int).astype(str)
+    chunks = []
+    for _, zc in zz.groupby(cell.values):
+        chunks.append(pyogrio.read_dataframe(shp, on_invalid='ignore', bbox=tuple(zc.total_bounds)))
+    pin = pd.concat(chunks, ignore_index=True)
+    pin = pin.drop_duplicates(subset=[c for c in pin.columns if c != 'geometry'][0])   # boxes overlap
+    pin = gpd.GeoDataFrame(pin, geometry='geometry', crs=crs)
+    pin = pin[pin.geometry.notna()].to_crs(3086)
+    pin['geometry'] = pin.geometry.make_valid()
     idcol = [c for c in pin.columns if c != 'geometry'][0]
     pin = gpd.sjoin(pin, zones, predicate='intersects')
     pin['key'] = pin[idcol].map(raw16.norm)
@@ -68,72 +81,77 @@ def main(dor_x, fdot, fdep_csv, land_csv, out_csv):
     roads = roads[roads.FUNCLASS.isin(['04', '06', '07', '08', '14', '16', '17', '18'])]
     fd = pd.read_csv(fdep_csv); fd = fd[fd.category == 'Competitor']
     comp = gpd.GeoDataFrame(fd, geometry=gpd.points_from_xy(fd.lon, fd.lat), crs=4326).to_crs(3086)
-    parts = []
-    for county, sub in g.groupby('county'):
-        z = gpd.GeoDataFrame({'i': sub.index}, geometry=sub.buffer(RL['touch_m']).values, crs=3086)
-        parts.append(all_parcels_near(os.path.join(dor_x, county.lower().replace(' ', '_')), z))
-    P = pd.concat(parts, ignore_index=True)
     rows = []
-    for i, r in g.iterrows():
-        p = r.geometry
-        near = P[P.i == i]
-        # main road: highest functional class at the corner (lowest last digit), then the longest
-        nr = roads[roads.distance(p) <= 60].copy()
-        ang = None
-        if len(nr):
-            nr['cls'] = nr.FUNCLASS.astype(int) % 10
-            top = nr[nr.cls == nr.cls.min()]
-            ang = ls18.orientation(unary_union(list(top.geometry)), p)
-        # station at the corner
-        st_parcels = near[near.uc.isin(STATION) | near.OWN_NAME.fillna('').str.upper().str.contains(COMP)]
-        st_pts = comp[comp.distance(p) <= OP['station_m']]
-        stations = []
-        for _, s in st_parcels.iterrows():
-            lbl = str(s.OWN_NAME).title() if COMP.search(str(s.OWN_NAME).upper()) else f'station parcel ({str(s.OWN_NAME).title()})'
-            stations.append((lbl, s.geometry.representative_point()))
-        for _, s in st_pts.iterrows():
-            if not any(q.distance(s.geometry) < 60 for _, q in stations):
-                stations.append((f"{s.brand}", s.geometry))
-        # redevelopment holding: largest single-owner block touching the corner
-        ok = near[near.uc.isin(SOFT) & near.PUBLIC_LND.isna()
-                  & ~near.OWN_NAME.fillna('').str.upper().str.contains(raw16.BAD_OWNER)
-                  & ~near.OWN_NAME.fillna('').str.upper().str.contains(COMP)
-                  & ~near.OWN_NAME.fillna('').str.upper().str.contains(EXCL)]
-        redev_owner, redev_ac, redev_built, redev_geom = None, 0.0, None, None
-        if len(ok):
-            by = ok.groupby(ok.OWN_NAME.map(nm)).agg(acres=('acres', 'sum'), owner=('OWN_NAME', 'first'), built=('NO_BULDNG', lambda s: int(s.fillna(0).sum())))
-            b = by.sort_values('acres', ascending=False).iloc[0]
-            redev_owner, redev_ac, redev_built = b.owner, round(float(b.acres), 2), b.built
-            redev_geom = unary_union(list(ok[ok.OWN_NAME.map(nm) == by.acres.idxmax()].geometry))
-        owners_at_corner = near.OWN_NAME.map(nm).nunique()
-        # option parcel location: raw parcel (from the land screen) or the redevelopment block
-        if r.land_ok and isinstance(r.land_parcel, str):
-            q = near[near.PARCEL_ID == r.land_parcel]
-            opt_geom = unary_union(list(q.geometry)) if len(q) else None
-            opt_type = 'Raw land'
-        else:
-            opt_geom = redev_geom; opt_type = 'One-owner land (houses/lots)'
-        redev_ok = (not r.land_ok) and redev_ac >= OP['redev_min_acres']
-        pos = None
-        if ang is not None and opt_geom is not None:
-            s_opt, dir_opt = side(p, ang, opt_geom.representative_point())
-            road = 'E-W' if dir_opt in ('eastbound', 'westbound') else 'N-S'
-            if stations:
-                st_sides = [(nmn, side(p, ang, sp)) for nmn, sp in stations]
-                same = [nmn for nmn, (s, _) in st_sides if s == s_opt]
-                opp = [nmn for nmn, (s, _) in st_sides if s != s_opt]
-                pos = f"Option on {s_opt} side of the {road} main road (serves {dir_opt})."
-                if opp and not same:
-                    pos += f" Station(s) across the road ({', '.join(opp)}): can outposition them for {dir_opt} traffic."
-                elif same and not opp:
-                    pos += f" Same side as {', '.join(same)}: competes head-on for {dir_opt} traffic."
-                else:
-                    pos += f" Stations on both sides ({', '.join(same + opp)})."
+    parts = out_csv + '.parts'; os.makedirs(parts, exist_ok=True)
+    for county, sub in g.groupby('county'):   # one county at a time keeps memory down (big county maps are 1M+ parcels)
+        part = os.path.join(parts, f"{county.lower().replace(' ', '_')}.csv")
+        if os.path.exists(part):   # resume: county already done
+            rows += pd.read_csv(part).to_dict('records'); continue
+        n0 = len(rows)
+        z = gpd.GeoDataFrame({'i': sub.index}, geometry=sub.buffer(RL['touch_m']).values, crs=3086)
+        P = all_parcels_near(os.path.join(dor_x, county.lower().replace(' ', '_')), z)
+        for i, r in sub.iterrows():
+            p = r.geometry
+            near = P[P.i == i]
+            # main road: highest functional class at the corner (lowest last digit), then the longest
+            nr = roads[roads.distance(p) <= 60].copy()
+            ang = None
+            if len(nr):
+                nr['cls'] = nr.FUNCLASS.astype(int) % 10
+                top = nr[nr.cls == nr.cls.min()]
+                ang = ls18.orientation(unary_union(list(top.geometry)), p)
+            # station at the corner
+            st_parcels = near[near.uc.isin(STATION) | near.OWN_NAME.fillna('').str.upper().str.contains(COMP)]
+            st_pts = comp[comp.distance(p) <= OP['station_m']]
+            stations = []
+            for _, s in st_parcels.iterrows():
+                lbl = str(s.OWN_NAME).title() if COMP.search(str(s.OWN_NAME).upper()) else f'station parcel ({str(s.OWN_NAME).title()})'
+                stations.append((lbl, s.geometry.representative_point()))
+            for _, s in st_pts.iterrows():
+                if not any(q.distance(s.geometry) < 60 for _, q in stations):
+                    stations.append((f"{s.brand}", s.geometry))
+            # redevelopment holding: largest single-owner block touching the corner
+            ok = near[near.uc.isin(SOFT) & near.PUBLIC_LND.isna()
+                      & ~near.OWN_NAME.fillna('').str.upper().str.contains(raw16.BAD_OWNER)
+                      & ~near.OWN_NAME.fillna('').str.upper().str.contains(COMP)
+                      & ~near.OWN_NAME.fillna('').str.upper().str.contains(EXCL)]
+            redev_owner, redev_ac, redev_built, redev_geom = None, 0.0, None, None
+            if len(ok):
+                by = ok.groupby(ok.OWN_NAME.map(nm)).agg(acres=('acres', 'sum'), owner=('OWN_NAME', 'first'), built=('NO_BULDNG', lambda s: int(s.fillna(0).sum())))
+                b = by.sort_values('acres', ascending=False).iloc[0]
+                redev_owner, redev_ac, redev_built = b.owner, round(float(b.acres), 2), b.built
+                redev_geom = unary_union(list(ok[ok.OWN_NAME.map(nm) == by.acres.idxmax()].geometry))
+            owners_at_corner = near.OWN_NAME.map(nm).nunique()
+            # option parcel location: raw parcel (from the land screen) or the redevelopment block
+            if r.land_ok and isinstance(r.land_parcel, str):
+                q = near[near.PARCEL_ID == r.land_parcel]
+                opt_geom = unary_union(list(q.geometry)) if len(q) else None
+                opt_type = 'Raw land'
             else:
-                pos = f"No station at the corner. Option on {s_opt} side of the {road} main road (serves {dir_opt})."
-        rows.append(dict(i=i, option_type=opt_type if (r.land_ok or redev_ok) else None, redev_ok=redev_ok, redev_owner=redev_owner,
-                         redev_acres=redev_ac, redev_buildings=redev_built, owners_at_corner=owners_at_corner,
-                         stations_at_corner='; '.join(sorted({s for s, _ in stations})) or None, positioning=pos))
+                opt_geom = redev_geom; opt_type = 'One-owner land (houses/lots)'
+            redev_ok = (not r.land_ok) and redev_ac >= OP['redev_min_acres']
+            pos = None
+            if ang is not None and opt_geom is not None:
+                s_opt, dir_opt = side(p, ang, opt_geom.representative_point())
+                road = 'E-W' if dir_opt in ('eastbound', 'westbound') else 'N-S'
+                if stations:
+                    st_sides = [(nmn, side(p, ang, sp)) for nmn, sp in stations]
+                    same = [nmn for nmn, (s, _) in st_sides if s == s_opt]
+                    opp = [nmn for nmn, (s, _) in st_sides if s != s_opt]
+                    pos = f"Option on {s_opt} side of the {road} main road (serves {dir_opt})."
+                    if opp and not same:
+                        pos += f" Station(s) across the road ({', '.join(opp)}): can outposition them for {dir_opt} traffic."
+                    elif same and not opp:
+                        pos += f" Same side as {', '.join(same)}: competes head-on for {dir_opt} traffic."
+                    else:
+                        pos += f" Stations on both sides ({', '.join(same + opp)})."
+                else:
+                    pos = f"No station at the corner. Option on {s_opt} side of the {road} main road (serves {dir_opt})."
+            rows.append(dict(i=i, option_type=opt_type if (r.land_ok or redev_ok) else None, redev_ok=redev_ok, redev_owner=redev_owner,
+                             redev_acres=redev_ac, redev_buildings=redev_built, owners_at_corner=owners_at_corner,
+                             stations_at_corner='; '.join(sorted({s for s, _ in stations})) or None, positioning=pos))
+        pd.DataFrame(rows[n0:]).to_csv(part, index=False)
+        del P; print(county, len(sub), flush=True)
     res = pd.DataFrame(rows).set_index('i')
     c.join(res).to_csv(out_csv, index=False)
     print('corners', len(c), '| raw-land options', int(c.land_ok.sum()), '| redevelopment options', int(res.redev_ok.sum()),

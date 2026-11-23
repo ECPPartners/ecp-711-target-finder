@@ -6,8 +6,9 @@ Joins stores to the nearest DOR commercial parcel (<= 60 m) to read the parcel's
 import sys, os, glob, json
 import pandas as pd, geopandas as gpd, numpy as np
 
-PILOT = {'Duval': 'Bauer', 'St Johns': 'Bauer', 'Clay': 'Bauer', 'Volusia': 'Bauer', 'Brevard': 'Bauer',
-         'Pasco': 'Golden', 'Hillsborough': 'Golden', 'St Lucie': 'Antonacci', 'Polk': 'Polk'}
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from model import load_model
+PILOT = load_model()['pilot_counties']
 TODAY = pd.Timestamp.today().strftime('%Y-%m-%d')
 
 def load_parcels(out):

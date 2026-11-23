@@ -1,4 +1,4 @@
-"""Top 50 with corner options workbook (v1.3+).
+"""Top N trade areas with corner options workbook (v1.3+; N = output.top_n_trade_areas).
 Usage: python3 -I 24_top50_workbook.py <top50.csv> <corner_status.csv> <prior_review.xlsx> <out.xlsx>
 prior_review.xlsx = last filled-in Top 50 review; its verdicts and Ross's comments carry onto matching corners.
 """
@@ -29,13 +29,14 @@ def main(top_csv, status_csv, prior_xlsx, out):
 
     wb = Workbook(); ws = wb.active; ws.title = 'Read Me'
     n_multi = int((top.groupby('n').size() > 1).sum())
-    lines = [(f"7-Eleven Target Area Finder — Top 50 with corner options (model {M['version']} DRAFT)", True),
+    TN = f"Top {O['top_n_trade_areas']}"
+    lines = [(f"7-Eleven Target Area Finder — {TN} with corner options (model {M['version']} DRAFT)", True),
              ('ECP Partners · Confidential · Do not share outside ECP', False),
              (f"Built {pd.Timestamp.today():%Y-%m-%d}. Not published to the live tool until Ross approves.", False), ('', False),
              ('How to read it', True),
              (f"Each number is a trade area: corners within {O['trade_area_max_diameter_mi']:g} miles of each other with strong new-home growth "
               f"(an option with {O['min_area_new_homes']:,}+ new homes 2023-25 within 3 mi) and 2+ miles from any 7-Eleven fuel store. "
-              f"Where an area has more than one viable corner they are listed as 2a, 2b, 2c ({n_multi} of the 50 areas have 2+ options; "
+              f"Where an area has more than one viable corner they are listed as 2a, 2b, 2c ({n_multi} of the {O["top_n_trade_areas"]} areas have 2+ options; "
               f"{len(top)} corners in all). Up to {O['max_options_per_area']} options per area, ordered by the best roads (traffic and signal) "
               f"so 'a' is the corner on the strongest roads; each scores at least {int(O['min_secondary_score_ratio'] * 100)}% of the area's best.", False),
              ('Viable corner = raw land that passes the land screen (problems shown as warnings, not removed), or one owner with '
@@ -46,10 +47,10 @@ def main(top_csv, status_csv, prior_xlsx, out):
               'says whether the option is across the road from it (can outposition it for that direction) or on the same side. '
               'This is information for the deal maker; it does not change the score.', False),
              (f"Highway Plays tab: up to {O.get('highway_top_n', 0)} corners with {O.get('highway_min_aadt', 0):,}+ cars/day in areas below the growth bar "
-              '(e.g. US-301 & CR-218). A separate short list, not part of the Top 50.', False),
+              f'(e.g. US-301 & CR-218). A separate short list, not part of the {TN}.', False),
              ('Grey columns carry Luke\'s v1.0 verdicts and Ross\'s Nov 23 comments. Yellow columns are for this review.', False), ('', False),
-             ('What changed from v1.2', True),
-             ('1. Top 50 trade areas with a/b/c options, ordered by best roads, up to 5 per area; highway plays listed separately (Ross, Nov 23). 2. Deal-maker corner status: corners marked taken or pass are left out '
+             (M.get('changes_heading', 'What changed from v1.2'), True),
+             (M.get('changes_line') or '1. Top 50 trade areas with a/b/c options, ordered by best roads, up to 5 per area; highway plays listed separately (Ross, Nov 23). 2. Deal-maker corner status: corners marked taken or pass are left out '
               '(see Passed & Taken tab; edit reviews/corner_status.csv to change). 3. 7-Elevens the team knows about that the sources miss are added '
               '(Silver Palm Blvd & SR-52 NEC), so corners within 2 mi drop. 4. One-owner land options. 5. Station-at-corner and road-side notes. '
               'Scoring weights unchanged from v1.2 (traffic 35, new homes 25).', False), ('', False),
@@ -57,6 +58,7 @@ def main(top_csv, status_csv, prior_xlsx, out):
              (f"• Strong growth = {O['min_area_new_homes']:,}+ new homes (2023-25, 3 mi) at one corner in the area. • Up to {O['max_options_per_area']} options per area. "
               f"• One-owner land: {OP['redev_min_acres']}+ ac, at most {OP['redev_max_buildings']} building. • Station at the corner = within {OP['station_m']} m.", False), ('', False),
              ('Known limits', True),
+             *([(M['extra_limits'], False)] if M.get('extra_limits') else []),
              ('• Stations under construction are only caught '
               'if the parcel is already owned by a competitor or coded as a station (Circle K at US-41 & Symmes was not). • Tax roll as of Jan 1, 2026. '
               '• Silver Palm & SR-52 7-Eleven location is approximate until we have the address.', False), ('', False),
@@ -75,6 +77,7 @@ def main(top_csv, status_csv, prior_xlsx, out):
                      'Option type': r.option_type, 'Score': r.score, 'Tier': r.tier,
                      'New homes 2023-25 (3 mi)': int(r.new_rooftops_3mi), 'Combined AADT (FDOT 2025)': None if pd.isna(r.combined_aadt) else int(r.combined_aadt),
                      'Signal': r.signal, 'Nearest 7-Eleven (mi)': round(r.dist_to_7eleven_mi, 1), 'Nearest 7-Eleven': r.nearest_7eleven,
+                     **({'New market': ('Yes' if r.dist_to_7eleven_mi >= O['new_market_mi'] else None)} if 'new_market_mi' in O else {}),
                      'Station at the corner': r.stations_at_corner if isinstance(r.stations_at_corner, str) else None,
                      'Road side / positioning': r.positioning if isinstance(r.positioning, str) else None,
                      'Land owner': r.land_owner if raw else r.redev_owner,
@@ -86,7 +89,7 @@ def main(top_csv, status_csv, prior_xlsx, out):
                      'Prior verdict (Luke)': pv(r.k, 'Would you chase it?'), 'Luke: why': pv(r.k, 'Why / why not'), 'Ross comment': pv(r.k, 'Ross comments'),
                      'Call 7-Eleven on it? (Yes / Maybe / No)': None, 'Why / why not': None, 'What you already know': None, 'Reviewer': None}
     df = pd.DataFrame([row(r, 'Option', r.option) for _, r in top.iterrows()])
-    ws2 = sheet(wb, 'Top 50', df, yellow=('Call 7-Eleven on it? (Yes / Maybe / No)', 'Why / why not', 'What you already know', 'Reviewer'), links=('Google Maps',))
+    ws2 = sheet(wb, TN, df, yellow=('Call 7-Eleven on it? (Yes / Maybe / No)', 'Why / why not', 'What you already know', 'Reviewer'), links=('Google Maps',))
     GRY = PatternFill('solid', start_color='EDEDED'); BAND = PatternFill('solid', start_color='F3F7FC')
     thick = Side(style='medium', color='1F3864')
     prev = None
@@ -106,6 +109,15 @@ def main(top_csv, status_csv, prior_xlsx, out):
     if len(hw):
         hdf = pd.DataFrame([row(r, 'Highway #', int(r.highway_rank)) for _, r in hw.iterrows()])
         sheet(wb, 'Highway Plays', hdf, yellow=('Call 7-Eleven on it? (Yes / Maybe / No)', 'Why / why not', 'What you already know', 'Reviewer'), links=('Google Maps',))
+    # summary by 7-Eleven real estate manager and county
+    top['mgr'] = top.re_manager.fillna('Unassigned')
+    by = top.groupby(['mgr', 'county']).agg(areas=('n', 'nunique'), corners=('option', 'count'), best=('n', 'min')).reset_index()
+    by = by.sort_values(['mgr', 'best']).rename(columns={'mgr': '7-Eleven RE manager', 'county': 'County', 'areas': 'Trade areas in list',
+                                                       'corners': 'Corner options', 'best': 'Best area #'})
+    tot = top.groupby('mgr').agg(a=('n', 'nunique'), c=('option', 'count')).reset_index()
+    by = pd.concat([by] + [pd.DataFrame([{'7-Eleven RE manager': r.mgr, 'County': 'ALL', 'Trade areas in list': r.a, 'Corner options': r.c}]) for _, r in tot.iterrows()],
+                   ignore_index=True).sort_values(['7-Eleven RE manager', 'County'])
+    sheet(wb, 'By Manager', by)
     st = pd.read_csv(status_csv)
     s_rows = [{'Intersection': title(r.intersection), 'County': r.county, 'Status': r.status, 'Reason': r.reason, 'Decided by': r.decided_by,
                'Decided on': r.decided_on} for _, r in st.iterrows()]
