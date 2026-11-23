@@ -80,17 +80,19 @@
     "trade_area_rank_by": "best option score",
     "top_n_trade_areas": 50,
     "max_options_per_area": 5,
-    "min_corner_spacing_mi": 0.5,
     "min_secondary_score_ratio": 0.6,
     "corners_per_trade_area": 5,
     "show_redevelopment_corner": false,
-    "min_area_new_homes": 500
+    "min_area_new_homes": 500,
+    "option_order": "best roads first: traffic + signal points, then total score",
+    "highway_min_aadt": 40000,
+    "highway_top_n": 15
   },
   "backtest": {
     "note": "weights unchanged from v1.2; v1.2 backtest applies (74th pct). Manual 7-Eleven store slightly changes gap scores near Silver Palm & SR-52."
   },
   "snapshot": "models/snapshots/v1.3-draft/",
-  "scope_approved": "Ross, 2026-11-23: Top 50 list where strong trade areas list every viable corner as 2a, 2b, 2c; from Ross's comments on Luke's No/Maybe corners.",
+  "scope_approved": "Ross, 2026-11-23: Top 50 list where strong trade areas list every viable corner as 2a, 2b, 2c; from Ross's comments on Luke's No/Maybe corners. Ross, 2026-11-23 follow-up: max 5 options per area (confirmed); no spacing between options, pick and order them by best roads; highway plays (40,000+ AADT below the growth bar) as a separate short list.",
   "signal_unknown_credit": 0.5,
   "use_manual_7eleven": true,
   "corner_status_file": "reviews/corner_status.csv",

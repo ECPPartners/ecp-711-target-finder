@@ -9,6 +9,8 @@ good spacing from an existing 7-Eleven and multiple viable options per our crite
      Qualifying areas rank by their best option's score; the top top_n_trade_areas are the Top 50.
   4. Options in an area: raw-land corners picked first, then one-owner land; listed best score first; at least min_corner_spacing_mi apart, each scoring at least
      min_secondary_score_ratio x the area's best, up to max_options_per_area. Labelled 1 (one option) or 2a, 2b, 2c.
+  5. Highway plays: viable corners with highway_min_aadt+ combined AADT in areas below the growth bar, best score first,
+     top highway_top_n (Ross, Nov 23: a separate short list rather than an exception to the Top 50).
 Usage: python3 -I 23_top50_options.py <options.csv> <corner_status.csv> <out.csv>
 """
 import sys, os, re, string
@@ -41,7 +43,8 @@ def main(opt_csv, status_csv, out_csv):
     order = v[v.area_growth_ok].groupby('ta').score.max().sort_values(ascending=False).index
     order = list(order) + [t for t in v.groupby('ta').score.max().sort_values(ascending=False).index if t not in set(order)]
     v['area_rank'] = v.ta.map({t: i + 1 for i, t in enumerate(order)})
-    v = v.sort_values(['area_rank', 'score'], ascending=[True, False])
+    v['road_pts'] = v.pts_traffic.fillna(0) + v.pts_signal.fillna(0)
+    v = v.sort_values(['area_rank', 'road_pts', 'score'], ascending=[True, False, False])
     lab = {}
     for t, sub in v.groupby('area_rank'):
         floor = sub.score.max() * O['min_secondary_score_ratio']
@@ -52,13 +55,16 @@ def main(opt_csv, status_csv, out_csv):
                 if (kind and r.option_type != kind) or (not kind and r.option_type == 'Raw land'): continue
                 if chosen and r.score < floor: continue
                 if len(chosen) == O['max_options_per_area']: break
-                if all(np.hypot(r.x - v.at[j, 'x'], r.y - v.at[j, 'y']) >= O['min_corner_spacing_mi'] * MI for j in chosen):
+                if O.get('min_corner_spacing_mi') is None or all(np.hypot(r.x - v.at[j, 'x'], r.y - v.at[j, 'y']) >= O['min_corner_spacing_mi'] * MI for j in chosen):
                     chosen.append(i)
-        chosen = sorted(chosen, key=lambda j: -v.at[j, 'score'])
+        chosen = sorted(chosen, key=lambda j: (-v.at[j, 'road_pts'], -v.at[j, 'score']))
         for n, i in enumerate(chosen):
             lab[i] = f'{t}' if len(chosen) == 1 else f'{t}{string.ascii_lowercase[n]}'
     v['option'] = pd.Series(lab)
     v['in_top'] = v.option.notna() & (v.area_rank <= O['top_n_trade_areas']) & v.area_growth_ok
+    hw = v[v.area_growth_ok.eq(False) & (v.combined_aadt >= O.get('highway_min_aadt', 1e12))].sort_values('score', ascending=False)
+    hw = hw.head(O.get('highway_top_n', 0))
+    v['highway_rank'] = pd.Series({i: n + 1 for n, i in enumerate(hw.index)})
     v['area_options'] = v.groupby('area_rank').option.transform('count')
     v['area_viable_corners'] = v.groupby('area_rank').option.transform('size')
     out = pd.concat([v.drop(columns=['x', 'y']), c[~c.viable]], ignore_index=True)
@@ -66,7 +72,7 @@ def main(opt_csv, status_csv, out_csv):
     top = v[v.in_top]
     print('viable corners', len(v), '| trade areas', v.ta.nunique(), '| Top', O['top_n_trade_areas'], 'areas ->', len(top), 'options',
           '| areas with 2+ options', int((top.groupby('area_rank').size() > 1).sum()),
-          '| raw/redev', dict(top.option_type.value_counts()))
+          '| raw/redev', dict(top.option_type.value_counts()), '| highway plays', int(v.highway_rank.notna().sum()))
 
 if __name__ == '__main__':
     main(*sys.argv[1:4])
